@@ -7,10 +7,15 @@
     Additional Extension Galleries) and install newer versions automatically. Add the feed as a file URL, e.g.
     file:///C:/Dev/sql-helper/gallery/atom.xml. Run after every build of SqlHelper.VisualStudio (the project does
     this itself); the feed's version comes from the .vsix's own manifest.
+
+    The release workflow also uses it, with -VsixUrl set to the release's download link, so the feed attached to each
+    GitHub release points at that release's .vsix.
 #>
 param(
     [Parameter(Mandatory)] [string] $VsixPath,
-    [Parameter(Mandatory)] [string] $GalleryDirectory
+    [Parameter(Mandatory)] [string] $GalleryDirectory,
+    # Where the feed says to download the .vsix from; by default the copy next to atom.xml.
+    [string] $VsixUrl
 )
 
 $ErrorActionPreference = 'Stop'
@@ -30,6 +35,7 @@ $metadata = $manifest.PackageManifest.Metadata
 $id = $metadata.Identity.Id
 $version = $metadata.Identity.Version
 $vsixName = Split-Path $VsixPath -Leaf
+if (-not $VsixUrl) { $VsixUrl = $vsixName }
 $updated = (Get-Date).ToUniversalTime().ToString('yyyy-MM-ddTHH:mm:ssZ')
 function Escape([string] $text) { [System.Security.SecurityElement]::Escape($text) }
 
@@ -51,7 +57,7 @@ $feed = @"
     <author>
       <name>$(Escape $metadata.Identity.Publisher)</name>
     </author>
-    <content type="application/octet-stream" src="$(Escape $vsixName)" />
+    <content type="application/octet-stream" src="$(Escape $VsixUrl)" />
     <Vsix xmlns="http://schemas.microsoft.com/developer/vsx-syndication-schema/2010" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
       <Id>$(Escape $id)</Id>
       <Version>$(Escape $version)</Version>

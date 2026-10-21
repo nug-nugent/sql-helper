@@ -37,8 +37,14 @@ dotnet run --project src/SqlHelper.Cli -- format path/to/script.sql
 
 ## Visual Studio and SSMS extension
 
-Building the solution produces `src/SqlHelper.VisualStudio/bin/<Configuration>/net48/SqlHelper.VisualStudio.vsix`.
+Download `SqlHelper.VisualStudio.vsix` from the [latest release](https://github.com/nug-nugent/sql-helper/releases/latest),
+or build it yourself (`src/SqlHelper.VisualStudio/bin/<Configuration>/net48/SqlHelper.VisualStudio.vsix`).
 Double-click it to install into Visual Studio 2022 / 2026 or SQL Server Management Studio 22 (close them first).
+
+To have Visual Studio keep it up to date, add the release feed under **Tools > Options > Environment > Extensions >
+Additional Extension Galleries**: `https://github.com/nug-nugent/sql-helper/releases/latest/download/atom.xml`. Each new
+release is then offered under **Extensions > Manage Extensions > Updates**. SSMS 22 shows the same setting but doesn't
+appear to check galleries for updates, so update it by running the new `.vsix`.
 
 It adds **SQL Helper > Format SQL** (under the Extensions menu, and on the editor's right-click menu), bound to
 **Ctrl+Alt+F**. It formats the selection, or the whole document if nothing is selected, as a single undo step. If
@@ -55,11 +61,8 @@ gives DH); check or change them under **Tools > Options > SQL Helper > General**
 Every build also copies the `.vsix` into `gallery\` at the repository root and writes a feed for it,
 `gallery\atom.xml` (by `build\Update-Gallery.ps1`; the folder isn't committed). Add the feed once in Visual Studio
 under **Tools > Options > Environment > Extensions > Additional Extension Galleries**, with the URL
-`file:///C:/Dev/sql-helper/gallery/atom.xml`. Visual Studio then offers each build with a higher version as an update
-under **Extensions > Manage Extensions > Updates**. The version in `source.extension.vsixmanifest` (and
-`InstalledProductRegistration` in `SqlHelperPackage.cs`) must go up for an update to be offered.
-
-SSMS 22 shows the same setting but doesn't appear to check galleries for updates, so update it by running the `.vsix`.
+`file:///C:/Dev/sql-helper/gallery/atom.xml`, for trying local builds. Visual Studio offers a build as an update when
+its version is higher than the installed one; a new commit raises it (see [Versions](#versions)).
 
 If an install finishes with "a post-installation step failed" and the extension then doesn't appear, close Visual
 Studio and run `devenv.exe /updateconfiguration` once.
@@ -71,6 +74,22 @@ Add a header from the command line (prints the result; the file isn't changed):
 ```bash
 dotnet run --project src/SqlHelper.Cli -- header path/to/proc.sql --initials DH --note "#12345: What changed"
 ```
+
+## Pull requests and releases
+
+`main` only changes through pull requests, and a pull request can only merge once the **Build** workflow
+(`.github/workflows/build.yml`) has built it and passed the tests on Windows. Each run keeps the `.vsix` as a
+download, to try the change before merging.
+
+Every merge to `main` runs the **Release** workflow (`.github/workflows/release.yml`), which builds and tests again and
+publishes a GitHub release tagged `v<version>` with the `.vsix`, the command-line tool (`sqlhelper-<version>.zip`,
+needs the .NET 10 runtime) and the `atom.xml` feed for Visual Studio.
+
+### Versions
+
+Versions are `<major>.<minor>.<patch>`. Major and minor are `VersionMajorMinor` in `Directory.Build.props`; change them
+there by hand. The patch is the number of commits on the branch being built, so every merge to `main` produces a
+higher one; it is never set by hand. Local builds work it out the same way from git.
 
 ## Command-line exit codes
 

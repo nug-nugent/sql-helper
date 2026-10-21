@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
   <Metadata>
-    <Identity Id="SqlHelper.da9f88e3-2c31-4753-a253-5f0959d25293" Version="2.2.4" Language="en-US" Publisher="David Huggett" />
+    <Identity Id="SqlHelper.da9f88e3-2c31-4753-a253-5f0959d25293" Version="|%CurrentProject%;GetVsixVersion|" Language="en-US" Publisher="David Huggett" />
     <DisplayName>SQL Helper</DisplayName>
     <Description xml:space="preserve">Formats T-SQL and adds standard comment headers, for SSMS and Visual Studio.</Description>
     <MoreInfo>https://github.com/nug-nugent/sql-helper</MoreInfo>
