@@ -46,8 +46,25 @@ the SQL can't be formatted, nothing changes and a message says why.
 
 **SQL Helper > Add Header** (**Ctrl+Alt+H**) adds the house comment header to the procedure, function or view in the
 document, or a dated history line to the header it already has (converting an SSMS template header), and leaves the
-cursor where you type the change. Set your initials first under **Tools > Options > SQL Helper > General**. The header
-format is in the [style guide](docs/style-guide.md#comment-headers).
+cursor where you type the change. Your initials are taken from your Windows account name the first time (David Huggett
+gives DH); check or change them under **Tools > Options > SQL Helper > General**. The header format is in the
+[style guide](docs/style-guide.md#comment-headers).
+
+### Updating from a local gallery
+
+Every build also copies the `.vsix` into `gallery\` at the repository root and writes a feed for it,
+`gallery\atom.xml` (by `build\Update-Gallery.ps1`; the folder isn't committed). Add the feed once in Visual Studio
+under **Tools > Options > Environment > Extensions > Additional Extension Galleries**, with the URL
+`file:///C:/Dev/sql-helper/gallery/atom.xml`. Visual Studio then offers each build with a higher version as an update
+under **Extensions > Manage Extensions > Updates**. The version in `source.extension.vsixmanifest` (and
+`InstalledProductRegistration` in `SqlHelperPackage.cs`) must go up for an update to be offered.
+
+SSMS 22 shows the same setting but doesn't appear to check galleries for updates, so update it by running the `.vsix`.
+
+If an install finishes with "a post-installation step failed" and the extension then doesn't appear, close Visual
+Studio and run `devenv.exe /updateconfiguration` once.
+
+### Comment headers from the command line
 
 Add a header from the command line (prints the result; the file isn't changed):
 

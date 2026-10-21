@@ -27,6 +27,7 @@
   <ItemGroup>
     <ProjectReference Include="..\SqlHelper.Formatting\SqlHelper.Formatting.csproj" />
     <Reference Include="System.Design" />
+    <Reference Include="System.DirectoryServices.AccountManagement" />
   </ItemGroup>
 
   <ItemGroup>
@@ -34,5 +35,10 @@
     <None Include="source.extension.vsixmanifest" SubType="Designer" />
     <Content Include="..\..\LICENSE.txt" Link="LICENSE.txt" IncludeInVSIX="true" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
+
+  <!-- Keeps a private extension gallery at <repo>\gallery up to date, so VS / SSMS can update from it (see README). -->
+  <Target Name="UpdateGallery" AfterTargets="CreateVsixContainer" Condition="'$(DesignTimeBuild)' != 'true' and Exists('$(TargetVsixContainer)')">
+    <Exec Command="powershell.exe -NoProfile -ExecutionPolicy Bypass -File &quot;$(MSBuildThisFileDirectory)..\..\build\Update-Gallery.ps1&quot; -VsixPath &quot;$(TargetVsixContainer)&quot; -GalleryDirectory &quot;$(MSBuildThisFileDirectory)..\..\gallery&quot;" />
+  </Target>
 
 </Project>

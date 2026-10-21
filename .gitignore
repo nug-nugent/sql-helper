@@ -4,6 +4,8 @@
 [Dd]ebug/
 [Rr]elease/
 *.vsix
+# Local extension gallery written by every build of SqlHelper.VisualStudio
+gallery/
 
 # IDE state
 .vs/

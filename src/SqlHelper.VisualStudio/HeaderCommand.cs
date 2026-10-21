@@ -1,5 +1,6 @@
 using System;
 using System.ComponentModel.Design;
+using System.DirectoryServices.AccountManagement;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.Text;
@@ -30,8 +31,8 @@ namespace SqlHelper.VisualStudio
             var view = ActiveEditor.ViewOrExplain();
             if (view == null) return;
 
-            string initials = ((GeneralOptionsPage)_package.GetDialogPage(typeof(GeneralOptionsPage))).Initials;
-            if (string.IsNullOrWhiteSpace(initials))
+            string initials = Initials();
+            if (initials == null)
             {
                 ActiveEditor.ShowMessage("Set your initials first, under Tools > Options > SQL Helper > General.", OLEMSGICON.OLEMSGICON_INFO);
                 return;
@@ -64,6 +65,36 @@ namespace SqlHelper.VisualStudio
             view.Selection.Clear();
             view.Caret.MoveTo(caret);
             view.ViewScroller.EnsureSpanVisible(new SnapshotSpan(caret, 0), EnsureSpanVisibleOptions.None);
+        }
+
+        /// <summary>
+        /// The initials setting. When it's empty, the first time through it is filled in from the Windows account's
+        /// display name (if that is a plain "First Last" name) and saved, so it shows in Tools > Options to change.
+        /// </summary>
+        static string Initials()
+        {
+            ThreadHelper.ThrowIfNotOnUIThread();
+            var page = (GeneralOptionsPage)_package.GetDialogPage(typeof(GeneralOptionsPage));
+            if (!string.IsNullOrWhiteSpace(page.Initials)) return page.Initials.Trim();
+
+            string derived = CommentHeader.InitialsOf(WindowsDisplayName());
+            if (derived == null) return null;
+            page.Initials = derived;
+            page.SaveSettingsToStorage();
+            return derived;
+        }
+
+        static string WindowsDisplayName()
+        {
+            try
+            {
+                return UserPrincipal.Current.DisplayName;
+            }
+            catch (Exception)
+            {
+                // No domain controller reachable, or an account type it can't read; the user sets initials by hand.
+                return null;
+            }
         }
     }
 }

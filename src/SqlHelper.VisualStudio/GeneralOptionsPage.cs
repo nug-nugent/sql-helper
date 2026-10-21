@@ -8,7 +8,7 @@ namespace SqlHelper.VisualStudio
     {
         [Category("Comment header")]
         [DisplayName("Your initials")]
-        [Description("Written on the history lines that Add Header adds, e.g. DH.")]
+        [Description("Written on the history lines that Add Header adds, e.g. DH. Filled in from your Windows account name the first time, if it can be.")]
         public string Initials { get; set; } = "";
     }
 }
