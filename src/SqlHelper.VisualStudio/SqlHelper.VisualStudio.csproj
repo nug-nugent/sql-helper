@@ -36,8 +36,25 @@
     <Content Include="..\..\LICENSE.txt" Link="LICENSE.txt" IncludeInVSIX="true" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
-  <!-- Keeps a private extension gallery at <repo>\gallery up to date, so VS / SSMS can update from it (see README). -->
-  <Target Name="UpdateGallery" AfterTargets="CreateVsixContainer" Condition="'$(DesignTimeBuild)' != 'true' and Exists('$(TargetVsixContainer)')">
+  <!-- The version (see Directory.Build.props) for the manifest's |%CurrentProject%;GetVsixVersion| token. -->
+  <Target Name="GetVsixVersion" DependsOnTargets="SetVersionFromGit" Returns="$(Version)" />
+
+  <!-- The same version as a constant, for [InstalledProductRegistration] (Help > About). -->
+  <Target Name="GenerateBuildVersion" BeforeTargets="CoreCompile" DependsOnTargets="SetVersionFromGit">
+    <PropertyGroup>
+      <_BuildVersionFile>$(IntermediateOutputPath)BuildVersion.g.cs</_BuildVersionFile>
+    </PropertyGroup>
+    <WriteLinesToFile File="$(_BuildVersionFile)" Overwrite="true" WriteOnlyWhenDifferent="true"
+                      Lines="namespace SqlHelper.VisualStudio { internal static class BuildVersion { public const string Value = &quot;$(Version)&quot;%3B } }" />
+    <ItemGroup>
+      <Compile Include="$(_BuildVersionFile)" />
+      <FileWrites Include="$(_BuildVersionFile)" />
+    </ItemGroup>
+  </Target>
+
+  <!-- Keeps a private extension gallery at <repo>\gallery up to date, so Visual Studio can update from it (see README).
+       Not on CI, where the release workflow writes its own feed. -->
+  <Target Name="UpdateGallery" AfterTargets="CreateVsixContainer" Condition="'$(DesignTimeBuild)' != 'true' and '$(CI)' != 'true' and Exists('$(TargetVsixContainer)')">
     <Exec Command="powershell.exe -NoProfile -ExecutionPolicy Bypass -File &quot;$(MSBuildThisFileDirectory)..\..\build\Update-Gallery.ps1&quot; -VsixPath &quot;$(TargetVsixContainer)&quot; -GalleryDirectory &quot;$(MSBuildThisFileDirectory)..\..\gallery&quot;" />
   </Target>
 

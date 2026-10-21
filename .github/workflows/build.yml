@@ -1,0 +1,42 @@
+# Every pull request to main: build, test, and keep the .vsix as a download so the change can be tried before merging.
+# The "build" job is the status check main's ruleset requires.
+name: Build
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build:
+    # The extension targets .NET Framework 4.8, so it builds on Windows.
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0 # the version's patch is the commit count
+
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Build
+        run: dotnet build SqlHelper.slnx --configuration Release
+
+      - name: Test
+        run: dotnet test SqlHelper.slnx --configuration Release --no-build
+
+      - name: Keep the .vsix
+        uses: actions/upload-artifact@v4
+        with:
+          name: SqlHelper.VisualStudio.vsix
+          path: src/SqlHelper.VisualStudio/bin/Release/net48/SqlHelper.VisualStudio.vsix
+          if-no-files-found: error
+
+      - name: Keep received test output
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: received
+          path: tests/**/*.received.sql
+          if-no-files-found: ignore

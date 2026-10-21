@@ -13,7 +13,7 @@ namespace SqlHelper.VisualStudio
     /// the first time one of its commands is used.
     /// </summary>
     [PackageRegistration(UseManagedResourcesOnly = true, AllowsBackgroundLoading = true)]
-    [InstalledProductRegistration("SQL Helper", "Formats T-SQL and adds standard comment headers.", "2.2.4")]
+    [InstalledProductRegistration("SQL Helper", "Formats T-SQL and adds standard comment headers.", BuildVersion.Value)]
     [ProvideMenuResource("Menus.ctmenu", 1)]
     [ProvideOptionPage(typeof(GeneralOptionsPage), "SQL Helper", "General", 0, 0, true)]
     // Lets the host load our own copy of ScriptDom when it hasn't already loaded one of its own.

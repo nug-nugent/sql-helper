@@ -1,0 +1,70 @@
+# Every push to main (in practice, every merged pull request): build, test, and publish a GitHub release tagged
+# v<major>.<minor>.<commit count>, with the .vsix, the command-line tool and an atom.xml extension feed attached.
+# Visual Studio can follow https://github.com/<owner>/<repo>/releases/latest/download/atom.xml to update itself.
+name: Release
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+# One release at a time, in order.
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0 # the version's patch is the commit count
+
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Work out the version
+        id: version
+        shell: pwsh
+        run: |
+          [xml] $props = Get-Content Directory.Build.props
+          $majorMinor = $props.Project.PropertyGroup.VersionMajorMinor | Where-Object { $_ } | Select-Object -First 1
+          $patch = git rev-list --count HEAD
+          "patch=$patch" >> $env:GITHUB_OUTPUT
+          "version=$majorMinor.$patch" >> $env:GITHUB_OUTPUT
+          Write-Host "Version $majorMinor.$patch"
+
+      - name: Build
+        run: dotnet build SqlHelper.slnx --configuration Release -p:VersionPatch=${{ steps.version.outputs.patch }}
+
+      - name: Test
+        run: dotnet test SqlHelper.slnx --configuration Release --no-build
+
+      - name: Package
+        shell: pwsh
+        run: |
+          $version = '${{ steps.version.outputs.version }}'
+          $out = New-Item -ItemType Directory -Force release
+          Copy-Item src/SqlHelper.VisualStudio/bin/Release/net48/SqlHelper.VisualStudio.vsix $out
+
+          dotnet publish src/SqlHelper.Cli --configuration Release --no-build --output publish/cli
+          Compress-Archive -Path publish/cli/* -DestinationPath "$out/sqlhelper-$version.zip"
+
+          $vsixUrl = "${{ github.server_url }}/${{ github.repository }}/releases/download/v$version/SqlHelper.VisualStudio.vsix"
+          ./build/Update-Gallery.ps1 -VsixPath "$out/SqlHelper.VisualStudio.vsix" -GalleryDirectory publish/feed -VsixUrl $vsixUrl
+          Copy-Item publish/feed/atom.xml $out
+
+      - name: Publish the release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $version = '${{ steps.version.outputs.version }}'
+          gh release create "v$version" (Get-ChildItem release).FullName `
+            --target '${{ github.sha }}' `
+            --title "SQL Helper $version" `
+            --generate-notes

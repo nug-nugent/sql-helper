@@ -1,0 +1,16 @@
+<Project>
+
+  <!-- Local builds: the version's patch is the commit count of HEAD (see Directory.Build.props). -->
+  <Target Name="SetVersionFromGit" BeforeTargets="GetAssemblyVersion;PrepareForBuild" Condition="'$(VersionPatch)' == ''">
+    <Exec Command="git rev-list --count HEAD" WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true"
+          IgnoreExitCode="true" StandardOutputImportance="low" StandardErrorImportance="low">
+      <Output TaskParameter="ConsoleOutput" PropertyName="_GitCommitCount" />
+    </Exec>
+    <PropertyGroup>
+      <VersionPatch Condition="$([System.Text.RegularExpressions.Regex]::IsMatch('$(_GitCommitCount)', '^\d+$'))">$(_GitCommitCount)</VersionPatch>
+      <VersionPatch Condition="'$(VersionPatch)' == ''">0</VersionPatch>
+      <Version>$(VersionMajorMinor).$(VersionPatch)</Version>
+    </PropertyGroup>
+  </Target>
+
+</Project>

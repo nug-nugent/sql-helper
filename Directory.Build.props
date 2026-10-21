@@ -3,7 +3,13 @@
     <LangVersion>latest</LangVersion>
     <Nullable>disable</Nullable>
     <ImplicitUsings>disable</ImplicitUsings>
-    <Version>2.0.0</Version>
+    <!--
+      The version is <VersionMajorMinor>.<patch>, where the patch is the number of commits on the branch being built
+      (so every merge to main gets a higher one). Releases pass VersionPatch explicitly; local builds work it out from
+      git in Directory.Build.targets. Change major or minor here; never set the patch by hand.
+    -->
+    <VersionMajorMinor>2.2</VersionMajorMinor>
+    <Version Condition="'$(VersionPatch)' != ''">$(VersionMajorMinor).$(VersionPatch)</Version>
     <Authors>David Huggett</Authors>
     <Product>SQL Helper</Product>
     <Copyright>Copyright © 2026 David Huggett</Copyright>
