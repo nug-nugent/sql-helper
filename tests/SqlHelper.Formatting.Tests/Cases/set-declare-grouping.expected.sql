@@ -1,0 +1,7 @@
+SET @x = 1
+SET @y = 2
+
+SELECT @z = 3
+
+DECLARE @a INT
+DECLARE @b INT

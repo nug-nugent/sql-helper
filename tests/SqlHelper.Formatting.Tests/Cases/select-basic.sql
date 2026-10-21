@@ -1,0 +1,1 @@
+select distinct top 10 a.Id, b.Name, count(*) as Cnt, 1 as One from dbo.TableA a inner join dbo.TableB b on a.Id = b.AId and b.Active = 1 left join dbo.C c on c.Id = a.CId where a.X = 1 and (b.Y = 2 or b.Z in (1,2,3)) group by a.Id, b.Name having count(*) > 1 order by b.Name

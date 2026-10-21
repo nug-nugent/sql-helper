@@ -1,0 +1,7 @@
+SELECT
+	a
+FROM
+	dbo.T
+WHERE
+	d BETWEEN '2020-01-01' AND '2021-01-01'
+	AND x = 1

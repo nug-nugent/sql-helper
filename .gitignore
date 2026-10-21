@@ -1,0 +1,29 @@
+# Build output
+[Bb]in/
+[Oo]bj/
+[Dd]ebug/
+[Rr]elease/
+*.vsix
+
+# IDE state
+.vs/
+.vscode/
+.idea/
+*.suo
+*.user
+*.userprefs
+
+# Test output
+[Tt]est[Rr]esults/
+*.trx
+# Snapshot test mismatches; review, then accept or fix
+*.received.sql
+
+# VS Code extension
+node_modules/
+out/
+
+# OS
+Thumbs.db
+Desktop.ini
+.DS_Store

@@ -1,0 +1,38 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- VS 2026 / SSMS 22 extension. The build produces bin\<Configuration>\net48\SqlHelper.VisualStudio.vsix. -->
+  <PropertyGroup>
+    <TargetFramework>net48</TargetFramework>
+    <RootNamespace>SqlHelper.VisualStudio</RootNamespace>
+    <Description>SQL Helper for Visual Studio and SQL Server Management Studio.</Description>
+
+    <!-- Pulls in the VSIX build targets from the Microsoft.VSSDK.BuildTools package. -->
+    <VSSDKBuildToolsAutoSetup>true</VSSDKBuildToolsAutoSetup>
+    <GeneratePkgDefFile>true</GeneratePkgDefFile>
+    <UseCodebase>true</UseCodebase>
+    <IncludeAssemblyInVSIXContainer>true</IncludeAssemblyInVSIXContainer>
+    <IncludeDebugSymbolsInVSIXContainer>false</IncludeDebugSymbolsInVSIXContainer>
+    <IncludeDebugSymbolsInLocalVSIXDeployment>true</IncludeDebugSymbolsInLocalVSIXDeployment>
+    <CopyBuildOutputToOutputDirectory>true</CopyBuildOutputToOutputDirectory>
+    <CopyOutputSymbolsToOutputDirectory>true</CopyOutputSymbolsToOutputDirectory>
+    <!-- Building shouldn't install anything; install the .vsix by hand, or debug in the experimental instance. -->
+    <DeployExtension>false</DeployExtension>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.VisualStudio.SDK" Version="17.14.40265" ExcludeAssets="runtime" />
+    <PackageReference Include="Microsoft.VSSDK.BuildTools" Version="18.5.40034" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SqlHelper.Formatting\SqlHelper.Formatting.csproj" />
+    <Reference Include="System.Design" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <VSCTCompile Include="SqlHelperPackage.vsct" ResourceName="Menus.ctmenu" />
+    <None Include="source.extension.vsixmanifest" SubType="Designer" />
+    <Content Include="..\..\LICENSE.txt" Link="LICENSE.txt" IncludeInVSIX="true" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+</Project>

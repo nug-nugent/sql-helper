@@ -1,0 +1,10 @@
+DECLARE
+	@a INT = 1
+	, @b VARCHAR(10) = 'x'
+
+DECLARE @t TABLE (
+	Id INT NOT NULL
+	, Name VARCHAR(10) NULL
+)
+
+SET @a = 2

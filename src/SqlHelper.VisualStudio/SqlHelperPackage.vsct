@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CommandTable xmlns="http://schemas.microsoft.com/VisualStudio/2005-10-18/CommandTable" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+  <Extern href="stdidcmd.h" />
+  <Extern href="vsshlids.h" />
+  <Include href="KnownImageIds.vsct" />
+
+  <Commands package="guidSqlHelperPackage">
+    <Menus>
+      <!-- A top-level SQL Helper menu; VS 2019+ (and so SSMS 22) moves extension menus under Extensions. -->
+      <Menu guid="guidSqlHelperCmdSet" id="SqlHelperMenu" priority="0x0100" type="Menu">
+        <Parent guid="guidSHLMainMenu" id="IDG_VS_MM_TOOLSADDINS" />
+        <Strings>
+          <ButtonText>SQL Helper</ButtonText>
+        </Strings>
+      </Menu>
+    </Menus>
+
+    <Groups>
+      <Group guid="guidSqlHelperCmdSet" id="SqlHelperMenuGroup" priority="0x0100">
+        <Parent guid="guidSqlHelperCmdSet" id="SqlHelperMenu" />
+      </Group>
+      <!-- Right-click menu in the code / query editor -->
+      <Group guid="guidSqlHelperCmdSet" id="EditorContextMenuGroup" priority="0x0600">
+        <Parent guid="guidSHLMainMenu" id="IDM_VS_CTXT_CODEWIN" />
+      </Group>
+    </Groups>
+
+    <Buttons>
+      <Button guid="guidSqlHelperCmdSet" id="FormatSqlCommand" priority="0x0100" type="Button">
+        <Parent guid="guidSqlHelperCmdSet" id="SqlHelperMenuGroup" />
+        <Icon guid="ImageCatalogGuid" id="FormatDocument" />
+        <CommandFlag>IconIsMoniker</CommandFlag>
+        <Strings>
+          <ButtonText>Format SQL</ButtonText>
+          <CanonicalName>SqlHelper.FormatSql</CanonicalName>
+          <LocCanonicalName>SqlHelper.FormatSql</LocCanonicalName>
+        </Strings>
+      </Button>
+    </Buttons>
+  </Commands>
+
+  <CommandPlacements>
+    <CommandPlacement guid="guidSqlHelperCmdSet" id="FormatSqlCommand" priority="0x0100">
+      <Parent guid="guidSqlHelperCmdSet" id="EditorContextMenuGroup" />
+    </CommandPlacement>
+  </CommandPlacements>
+
+  <KeyBindings>
+    <!-- Ctrl+Alt+F in the text editor, as in the old extension. Reassign under Tools > Options > Keyboard. -->
+    <KeyBinding guid="guidSqlHelperCmdSet" id="FormatSqlCommand" editor="guidTextEditor" mod1="Control Alt" key1="F" />
+  </KeyBindings>
+
+  <Symbols>
+    <GuidSymbol name="guidSqlHelperPackage" value="{d476471b-7c48-48a7-8be0-451c4290ae08}" />
+    <GuidSymbol name="guidTextEditor" value="{8b382828-6202-11d1-8870-0000f87579d2}" />
+    <GuidSymbol name="guidSqlHelperCmdSet" value="{2de80807-30c5-4fd7-81ef-a3cd5102261d}">
+      <IDSymbol name="SqlHelperMenu" value="0x1001" />
+      <IDSymbol name="SqlHelperMenuGroup" value="0x1002" />
+      <IDSymbol name="EditorContextMenuGroup" value="0x1003" />
+      <IDSymbol name="FormatSqlCommand" value="0x0100" />
+    </GuidSymbol>
+  </Symbols>
+</CommandTable>

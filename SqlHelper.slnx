@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/SqlHelper.Cli/SqlHelper.Cli.csproj" />
+    <Project Path="src/SqlHelper.Formatting/SqlHelper.Formatting.csproj" />
+    <Project Path="src/SqlHelper.VisualStudio/SqlHelper.VisualStudio.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/SqlHelper.Formatting.Tests/SqlHelper.Formatting.Tests.csproj" />
+  </Folder>
+</Solution>

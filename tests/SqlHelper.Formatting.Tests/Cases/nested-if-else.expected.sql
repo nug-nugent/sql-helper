@@ -1,0 +1,13 @@
+IF @a = 1
+BEGIN
+	IF @b = 2
+		PRINT 'x'
+	ELSE
+		PRINT 'y'
+END
+ELSE IF @a = 2
+BEGIN
+	PRINT 'z'
+END
+ELSE
+	PRINT 'w'

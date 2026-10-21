@@ -1,0 +1,1 @@
+with cte as (select Id, case when X = 1 then 'a' when X = 2 then 'b' else 'c' end as Lbl from dbo.T) select c.Id, c.Lbl from cte c cross apply (select top 1 * from dbo.U u where u.Id = c.Id) x where exists (select 1 from dbo.V v where v.Id = c.Id)

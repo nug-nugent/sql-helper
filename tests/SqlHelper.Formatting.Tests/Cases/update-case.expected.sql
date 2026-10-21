@@ -1,0 +1,10 @@
+UPDATE
+	dbo.T
+SET
+	A = CASE
+		WHEN B = 1
+			THEN 2
+		ELSE 3
+	END
+WHERE
+	C = 1

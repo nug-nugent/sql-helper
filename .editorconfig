@@ -1,0 +1,19 @@
+root = true
+
+[*]
+indent_style = space
+indent_size = 4
+insert_final_newline = false
+trim_trailing_whitespace = true
+
+[*.cs]
+charset = utf-8-bom
+
+[*.{csproj,props,targets,slnx,vsct,vsixmanifest,xml,json,yml}]
+indent_size = 2
+
+# Snapshot cases are compared byte-for-byte (after line-ending normalisation); never let an editor touch them.
+[tests/**/Cases/*.sql]
+indent_style = unset
+indent_size = unset
+trim_trailing_whitespace = false
