@@ -22,6 +22,22 @@
    sequences) with the input. Any difference, or any exception during stages 2–3, returns the input unchanged with a
    message, so a layout bug can never cost the user their text or crash the host editor.
 
+## Comment header
+
+`CommentHeader.Apply` is separate from formatting and doesn't use the layout plan. It parses the script, takes the
+first procedure, function or view (`ProcedureStatementBody`, `FunctionStatementBody`, `ViewStatementBody`, which
+cover `CREATE`, `ALTER` and `CREATE OR ALTER`), and looks at the comment tokens between that statement's first token
+and the code before it. The result is one splice of the original text, so nothing outside it moves:
+
+- a house header (`HeaderText.IsHouseHeader`) gets a line inserted before its closing rule;
+- an SSMS template header (a run of `--` comments, one per line, between `-- ====` rules, read by
+  `HeaderText.ParseSsms`) is replaced by a house header built from it;
+- otherwise a new header is inserted at the start of the object's line.
+
+`RoundTripCheck.FindCodeProblem` then checks the code tokens (not the comments, which change on purpose) against the
+input. `HeaderResult.CaretOffset` tells the editor where to leave the cursor. A `--` comment token doesn't include its
+line break; the break is the whitespace token that follows.
+
 ## ScriptDom quirks worked around
 
 - An `EXISTS` predicate's fragment starts at its `(`; the `EXISTS` keyword belongs to no fragment

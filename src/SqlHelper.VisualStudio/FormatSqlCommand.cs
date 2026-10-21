@@ -1,15 +1,9 @@
 using System;
 using System.ComponentModel.Design;
-using Microsoft;
-using Microsoft.VisualStudio.ComponentModelHost;
-using Microsoft.VisualStudio.Editor;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.Text;
-using Microsoft.VisualStudio.Text.Editor;
-using Microsoft.VisualStudio.TextManager.Interop;
 using SqlHelper.Formatting;
-using Task = System.Threading.Tasks.Task;
 
 namespace SqlHelper.VisualStudio
 {
@@ -19,21 +13,8 @@ namespace SqlHelper.VisualStudio
     /// </summary>
     internal static class FormatSqlCommand
     {
-        const string Title = "SQL Helper";
-
-        static AsyncPackage _package;
-        static IVsTextManager _textManager;
-        static IVsEditorAdaptersFactoryService _editorAdapters;
-
-        public static async Task InitializeAsync(AsyncPackage package, OleMenuCommandService commandService)
+        public static void Initialize(OleMenuCommandService commandService)
         {
-            _package = package;
-            _textManager = (IVsTextManager)await package.GetServiceAsync(typeof(SVsTextManager));
-            var componentModel = (IComponentModel)await package.GetServiceAsync(typeof(SComponentModel));
-            Assumes.Present(_textManager);
-            Assumes.Present(componentModel);
-            _editorAdapters = componentModel.GetService<IVsEditorAdaptersFactoryService>();
-
             commandService.AddCommand(new MenuCommand(Execute, new CommandID(PackageIds.CommandSet, PackageIds.FormatSqlCommand)));
         }
 
@@ -41,12 +22,8 @@ namespace SqlHelper.VisualStudio
         {
             ThreadHelper.ThrowIfNotOnUIThread();
 
-            var view = ActiveTextView();
-            if (view == null)
-            {
-                ShowMessage("Open a query window or .sql file first.", OLEMSGICON.OLEMSGICON_INFO);
-                return;
-            }
+            var view = ActiveEditor.ViewOrExplain();
+            if (view == null) return;
 
             var snapshot = view.TextBuffer.CurrentSnapshot;
             bool wholeDocument = view.Selection.IsEmpty;
@@ -55,11 +32,11 @@ namespace SqlHelper.VisualStudio
                 : new SnapshotSpan(view.Selection.Start.Position, view.Selection.End.Position);
             string text = span.GetText();
 
-            var result = new SqlFormatter(new FormattingOptions { NewLine = LineBreakUsedIn(snapshot) }).Format(text);
+            var result = new SqlFormatter(new FormattingOptions { NewLine = ActiveEditor.LineBreakUsedIn(snapshot) }).Format(text);
             if (!result.Succeeded)
             {
                 string where = wholeDocument ? "" : "In the selected text:" + Environment.NewLine;
-                ShowMessage(where + string.Join(Environment.NewLine, result.Errors), OLEMSGICON.OLEMSGICON_WARNING);
+                ActiveEditor.ShowMessage(where + string.Join(Environment.NewLine, result.Errors), OLEMSGICON.OLEMSGICON_WARNING);
                 return;
             }
 
@@ -75,26 +52,6 @@ namespace SqlHelper.VisualStudio
                 edit.Replace(span, replacement);
                 edit.Apply();
             }
-        }
-
-        static IWpfTextView ActiveTextView()
-        {
-            ThreadHelper.ThrowIfNotOnUIThread();
-            _textManager.GetActiveView(1, null, out IVsTextView activeView);
-            return activeView == null ? null : _editorAdapters.GetWpfTextView(activeView);
-        }
-
-        /// <summary>The document's own line break, so formatting doesn't mix CRLF and LF.</summary>
-        static string LineBreakUsedIn(ITextSnapshot snapshot)
-        {
-            foreach (var line in snapshot.Lines)
-                if (line.LineBreakLength > 0) return line.GetLineBreakText();
-            return Environment.NewLine;
-        }
-
-        static void ShowMessage(string message, OLEMSGICON icon)
-        {
-            VsShellUtilities.ShowMessageBox(_package, message, Title, icon, OLEMSGBUTTON.OLEMSGBUTTON_OK, OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
         }
     }
 }

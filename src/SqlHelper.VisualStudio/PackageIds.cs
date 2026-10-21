@@ -10,5 +10,6 @@ namespace SqlHelper.VisualStudio
         public static readonly Guid CommandSet = new Guid("2de80807-30c5-4fd7-81ef-a3cd5102261d");
 
         public const int FormatSqlCommand = 0x0100;
+        public const int HeaderCommand = 0x0101;
     }
 }

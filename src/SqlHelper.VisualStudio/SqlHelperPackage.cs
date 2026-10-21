@@ -15,6 +15,7 @@ namespace SqlHelper.VisualStudio
     [PackageRegistration(UseManagedResourcesOnly = true, AllowsBackgroundLoading = true)]
     [InstalledProductRegistration("SQL Helper", "T-SQL formatting in your house style.", "2.0.0")]
     [ProvideMenuResource("Menus.ctmenu", 1)]
+    [ProvideOptionPage(typeof(GeneralOptionsPage), "SQL Helper", "General", 0, 0, true)]
     // Lets the host load our own copy of ScriptDom when it hasn't already loaded one of its own.
     [ProvideBindingPath]
     [Guid(PackageIds.PackageGuidString)]
@@ -25,7 +26,9 @@ namespace SqlHelper.VisualStudio
             await JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
             var commandService = (OleMenuCommandService)await GetServiceAsync(typeof(IMenuCommandService));
             Assumes.Present(commandService);
-            await FormatSqlCommand.InitializeAsync(this, commandService);
+            await ActiveEditor.InitializeAsync(this);
+            FormatSqlCommand.Initialize(commandService);
+            HeaderCommand.Initialize(this, commandService);
         }
     }
 }

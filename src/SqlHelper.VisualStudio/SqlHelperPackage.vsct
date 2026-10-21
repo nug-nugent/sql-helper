@@ -37,6 +37,16 @@
           <LocCanonicalName>SqlHelper.FormatSql</LocCanonicalName>
         </Strings>
       </Button>
+      <Button guid="guidSqlHelperCmdSet" id="HeaderCommand" priority="0x0200" type="Button">
+        <Parent guid="guidSqlHelperCmdSet" id="SqlHelperMenuGroup" />
+        <Icon guid="ImageCatalogGuid" id="AddComment" />
+        <CommandFlag>IconIsMoniker</CommandFlag>
+        <Strings>
+          <ButtonText>Add Header</ButtonText>
+          <CanonicalName>SqlHelper.AddHeader</CanonicalName>
+          <LocCanonicalName>SqlHelper.AddHeader</LocCanonicalName>
+        </Strings>
+      </Button>
     </Buttons>
   </Commands>
 
@@ -44,11 +54,15 @@
     <CommandPlacement guid="guidSqlHelperCmdSet" id="FormatSqlCommand" priority="0x0100">
       <Parent guid="guidSqlHelperCmdSet" id="EditorContextMenuGroup" />
     </CommandPlacement>
+    <CommandPlacement guid="guidSqlHelperCmdSet" id="HeaderCommand" priority="0x0200">
+      <Parent guid="guidSqlHelperCmdSet" id="EditorContextMenuGroup" />
+    </CommandPlacement>
   </CommandPlacements>
 
   <KeyBindings>
     <!-- Ctrl+Alt+F in the text editor, as in the old extension. Reassign under Tools > Options > Keyboard. -->
     <KeyBinding guid="guidSqlHelperCmdSet" id="FormatSqlCommand" editor="guidTextEditor" mod1="Control Alt" key1="F" />
+    <KeyBinding guid="guidSqlHelperCmdSet" id="HeaderCommand" editor="guidTextEditor" mod1="Control Alt" key1="H" />
   </KeyBindings>
 
   <Symbols>
@@ -59,6 +73,7 @@
       <IDSymbol name="SqlHelperMenuGroup" value="0x1002" />
       <IDSymbol name="EditorContextMenuGroup" value="0x1003" />
       <IDSymbol name="FormatSqlCommand" value="0x0100" />
+      <IDSymbol name="HeaderCommand" value="0x0101" />
     </GuidSymbol>
   </Symbols>
 </CommandTable>

@@ -13,7 +13,14 @@ namespace SqlHelper.Formatting.Verification
     /// </summary>
     internal static class RoundTripCheck
     {
-        public static string FindProblem(IList<TSqlParserToken> inputTokens, string output, Func<TSqlParser> createParser)
+        public static string FindProblem(IList<TSqlParserToken> inputTokens, string output, Func<TSqlParser> createParser) =>
+            Check(inputTokens, output, createParser, compareComments: true);
+
+        /// <summary>The same check for a change that rewrites comments on purpose (the comment header): code only.</summary>
+        public static string FindCodeProblem(IList<TSqlParserToken> inputTokens, string output, Func<TSqlParser> createParser) =>
+            Check(inputTokens, output, createParser, compareComments: false);
+
+        static string Check(IList<TSqlParserToken> inputTokens, string output, Func<TSqlParser> createParser, bool compareComments)
         {
             var parser = createParser();
             IList<TSqlParserToken> outputTokens;
@@ -29,7 +36,7 @@ namespace SqlHelper.Formatting.Verification
             }
 
             return Compare("code", Code(inputTokens), Code(outputTokens))
-                ?? Compare("comments", Comments(inputTokens), Comments(outputTokens));
+                ?? (compareComments ? Compare("comments", Comments(inputTokens), Comments(outputTokens)) : null);
         }
 
         static List<TSqlParserToken> Code(IList<TSqlParserToken> tokens) =>

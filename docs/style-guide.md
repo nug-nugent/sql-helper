@@ -164,3 +164,36 @@ WHEN NOT MATCHED THEN
 - In a list, a trailing comment belongs to the item before the comma: `a, -- note` becomes `a -- note` with `, b` on
   the next line.
 - Block comments (`/* … */`) keep their internal text and line breaks exactly.
+
+## Comment headers
+
+Not part of formatting: a separate command (**SQL Helper > Add Header**, `sqlhelper header`) that adds or updates the
+house header on the first procedure, function or view in a script. It changes only the header comment; the code is
+checked to be untouched. The cases are in `tests/SqlHelper.Formatting.Tests/HeaderCases`.
+
+```
+/* =====================================================================================================================
+	Description
+		Returns a list of Matches
+
+	Update History
+		02/12/2013 : DH - Created
+		21/10/2026 : DH - #12345: Fixed the date filter
+===================================================================================================================== */
+CREATE PROCEDURE dbo.MatchListGet
+```
+
+- Both rule lines are 120 characters. Headings are one tab in, their content two. History lines are
+  `dd/MM/yyyy : initials - what changed`, oldest first.
+- The header goes directly before the `CREATE` / `ALTER`.
+- **No header:** a new one is added with an empty description line and `<today> : <you> - Created`. Other comments
+  before the object are left where they are.
+- **House header:** a history line `<today> : <you> - ` is added at the end; everything else is left exactly as it was.
+- **SSMS template header** (`-- Author:` / `-- Create date:` / `-- Description:` between `-- ====` rules): converted.
+  The description moves across (it may run over several `--` lines); author and date become the first history line,
+  `<date> : <initials> - Created`, with the date copied as written and the author shortened to initials only when it is
+  a plain "First Last" name; then the new line is added. A template never filled in (`<Author,,Name>`) counts as no
+  header. Anything else in the block (another label, author without date) means it isn't recognised: it stays as it
+  is and a new header is added below it, so no text is ever lost.
+- The empty description line is two tabs, and an added line with no note yet ends in `- `: both are where the cursor
+  is left for typing, so they are the one exception to "no trailing whitespace".
