@@ -1,5 +1,6 @@
 # Every push to main (in practice, every merged pull request): build, test, and publish a GitHub release tagged
 # v<major>.<minor>.<commit count>, with the .vsix, the command-line tool and an atom.xml extension feed attached.
+# The notes are build/release-notes.md (how to install) followed by GitHub's generated list of merged pull requests.
 # Visual Studio can follow https://github.com/<owner>/<repo>/releases/latest/download/atom.xml to update itself.
 name: Release
 
@@ -67,4 +68,5 @@ jobs:
           gh release create "v$version" (Get-ChildItem release).FullName `
             --target '${{ github.sha }}' `
             --title "SQL Helper $version" `
+            --notes-file build/release-notes.md `
             --generate-notes
