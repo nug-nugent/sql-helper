@@ -18,7 +18,7 @@ The style is described in [docs/style-guide.md](docs/style-guide.md).
 | `src/SqlHelper.Cli` | `sqlhelper format [file]`: formats a file or standard input to standard output |
 | `src/SqlHelper.VisualStudio` | VS 2026 / SSMS 22 extension; builds `SqlHelper.VisualStudio.vsix` |
 | `tests/SqlHelper.Formatting.Tests` | Spec tests: each `Cases/*.sql` must format to exactly its `*.expected.sql` |
-| `docs/` | The style guide |
+| `docs/` | The [style guide](docs/style-guide.md), [how the formatter works](docs/architecture.md), and the [TODO list](docs/TODO.md) |
 
 ## Build and test
 
