@@ -37,8 +37,14 @@
     <Content Include="..\..\LICENSE.txt" Link="LICENSE.txt" IncludeInVSIX="true" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
-  <!-- The version (see Directory.Build.props) for the manifest's |%CurrentProject%;GetVsixVersion| token. -->
-  <Target Name="GetVsixVersion" DependsOnTargets="SetVersionFromGit" Returns="$(Version)" />
+  <!-- The version (see Directory.Build.props) for the manifest's |%CurrentProject%;GetVsixVersion| token. Debug builds
+       add a fourth part, the minutes since 1 January 2026 (UTC), so each one installs over the last. -->
+  <Target Name="GetVsixVersion" DependsOnTargets="SetVersionFromGit" Returns="$(VsixVersion)">
+    <PropertyGroup Condition="'$(VsixVersion)' == ''">
+      <VsixVersion>$(Version)</VsixVersion>
+      <VsixVersion Condition="'$(Configuration)' == 'Debug'">$(Version).$([System.Math]::Floor($([MSBuild]::Divide($([MSBuild]::Subtract($([System.DateTime]::UtcNow.Ticks), 639028224000000000)), 600000000))))</VsixVersion>
+    </PropertyGroup>
+  </Target>
 
   <!-- The same version as a constant, for [InstalledProductRegistration] (Help > About). -->
   <Target Name="GenerateBuildVersion" BeforeTargets="CoreCompile" DependsOnTargets="SetVersionFromGit">

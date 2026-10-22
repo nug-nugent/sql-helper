@@ -46,7 +46,7 @@ Additional Extension Galleries**: `https://github.com/nug-nugent/sql-helper/rele
 release is then offered under **Extensions > Manage Extensions > Updates**. SSMS 22 shows the same setting but doesn't
 appear to check galleries for updates, so update it by running the new `.vsix`.
 
-It adds **SQL Helper > Format SQL** (under the Extensions menu, and on the editor's right-click menu), bound to
+It adds **SQL Helper > Format SQL** (under the Extensions menu, and on the query editor's right-click menu), bound to
 **Ctrl+Alt+F**. It formats the selection, or the whole document if nothing is selected, as a single undo step. If
 the SQL can't be formatted, nothing changes and a message says why.
 
