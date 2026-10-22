@@ -19,7 +19,7 @@ namespace SqlHelper.Formatting
     /// <item>A house header gets a history line added at the end.</item>
     /// <item>An SSMS template header (<c>-- Author: / Create date: / Description:</c>) is rewritten as a house header,
     /// its author and date becoming the first history line, plus the added line.</item>
-    /// <item>A dash history block (<c>-- SR - 01/06/2023 - what changed</c> lines between <c>-------</c> rules) is
+    /// <item>A dash history block (<c>-- AB - 01/06/2023 - what changed</c> lines between <c>-------</c> rules) is
     /// rewritten as a house header with those lines as its history, plus the added line.</item>
     /// <item>Otherwise a new header goes directly before the object, and any other comments stay where they are.</item>
     /// </list>

@@ -30,7 +30,7 @@ namespace SqlHelper.Formatting.Headers
         static readonly Regex PersonName = new Regex(@"^[A-Za-z]+(\s+[A-Za-z]+)+$");
 
         static readonly Regex DashRule = new Regex(@"^-{10,}\s*$");
-        // -- SR - 01/06/2023 - PBI 13217 - EMR Patient Summary
+        // -- AB - 01/06/2023 - PBI 10001 - Widget Summary
         static readonly Regex DashHistoryLine = new Regex(@"^--\s*([A-Za-z]{1,4})\s*-\s*(\d{2}/\d{2}/\d{4})\s*-\s*(.*?)\s*$");
 
         /// <summary>A <c>/* ===</c> … <c>=== */</c> block comment with an Update History section.</summary>
@@ -88,8 +88,8 @@ namespace SqlHelper.Formatting.Headers
         public static bool IsDashRule(string comment) => DashRule.IsMatch(comment.TrimEnd('\r', '\n'));
 
         /// <summary>
-        /// Reads the lines between a dash history block's rules (<c>-- SR - 01/06/2023 - what changed</c>) as house
-        /// history lines (<c>01/06/2023 : SR - what changed</c>), or returns null if any line is anything else or
+        /// Reads the lines between a dash history block's rules (<c>-- AB - 01/06/2023 - what changed</c>) as house
+        /// history lines (<c>01/06/2023 : AB - what changed</c>), or returns null if any line is anything else or
         /// there are none. Lines that are just <c>--</c> are skipped.
         /// </summary>
         public static List<string> ParseDashHistory(IEnumerable<string> comments)

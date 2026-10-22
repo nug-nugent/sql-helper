@@ -90,20 +90,20 @@ namespace SqlHelper.Formatting.Tests
         [Fact]
         public void DashHistorySkipsEmptyLinesAndLeavesTheCaretOnTheAddedLine()
         {
-            var result = Apply($"{Dashes}\n-- SR - 01/06/2023 - First\n--\n-- BD-28/06/2024-Second\n{Dashes}\n" + Procedure);
+            var result = Apply($"{Dashes}\n-- AB - 01/06/2023 - First\n--\n-- CD-28/06/2024-Second\n{Dashes}\n" + Procedure);
 
-            Assert.Contains("\t\t01/06/2023 : SR - First\n\t\t28/06/2024 : BD - Second\n\t\t21/10/2026 : DH - #12345: Example change\n", result.Text);
+            Assert.Contains("\t\t01/06/2023 : AB - First\n\t\t28/06/2024 : CD - Second\n\t\t21/10/2026 : DH - #12345: Example change\n", result.Text);
             Assert.EndsWith("21/10/2026 : DH - #12345: Example change", result.Text.Substring(0, result.CaretOffset));
         }
 
         [Theory]
         [InlineData("-- David Huggett - 01/06/2023 - Full name instead of initials\n")]
-        [InlineData("-- SR - 1/6/23 - Short date\n")]
-        [InlineData("-- SR - 01/06/2023 -\n")]
+        [InlineData("-- AB - 1/6/23 - Short date\n")]
+        [InlineData("-- AB - 01/06/2023 -\n")]
         [InlineData("-- Fixed the paging\n")]
         public void DashBlockWithAnyOtherLineIsKeptAndANewHeaderAdded(string line)
         {
-            string block = $"{Dashes}\n-- SR - 01/06/2023 - First\n{line}{Dashes}\n";
+            string block = $"{Dashes}\n-- AB - 01/06/2023 - First\n{line}{Dashes}\n";
 
             Assert.StartsWith(block + "/* ===", Apply(block + Procedure).Text);
         }
@@ -111,7 +111,7 @@ namespace SqlHelper.Formatting.Tests
         [Fact]
         public void DashLinesWithNoClosingRuleAreKept()
         {
-            string block = $"{Dashes}\n-- SR - 01/06/2023 - First\n";
+            string block = $"{Dashes}\n-- AB - 01/06/2023 - First\n";
 
             Assert.StartsWith(block + "/* ===", Apply(block + Procedure).Text);
         }

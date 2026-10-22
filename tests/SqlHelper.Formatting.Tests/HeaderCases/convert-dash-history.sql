@@ -1,11 +1,11 @@
 -----------------------------------------------------------------------
--- SR - 01/06/2023 - PBI 13217 - EMR Patient Summary > Latest Information
--- BD - 28/06/2024 - PBI 59898 - EMR Solution > Hicom.Engine V3 Upgrade 
--- DS - 20/05/2025 - BUG-90602-EMR-Episode-Graphs-Not-Updating-After-Saving-Blood-Glucose-and-Foot-Charcot-Values
+-- AB - 01/06/2023 - PBI 10001 - Widget Summary > Latest Details
+-- CD - 28/06/2024 - PBI 10002 - Widget Service > Framework V3 Upgrade 
+-- EF - 20/05/2025 - BUG-10003-Widget-Totals-Not-Updating-After-Saving-Line-and-Discount-Values
 -----------------------------------------------------------------------
-CREATE PROCEDURE dbo.PatientSummaryGet
-	@PatientID INT
+CREATE PROCEDURE dbo.WidgetSummaryGet
+	@WidgetID INT
 AS
 BEGIN
-	SELECT PatientID FROM dbo.Patients WHERE PatientID = @PatientID
+	SELECT WidgetID FROM dbo.Widgets WHERE WidgetID = @WidgetID
 END
