@@ -220,3 +220,41 @@ cases are in `tests/SqlHelper.Formatting.Tests/SemicolonCases`.
 - **Server-side final SQL:** the last statement before a `--##ServerSideFinalSqlEnd` comment (with only whitespace and
   comments between them) is never terminated, and a `;` it already has is removed. The marker is matched ignoring
   case and any spaces after the `--`.
+
+## Server-side markers
+
+Not part of formatting: a separate command (**SQL Helper > Add Server-Side Markers**, `sqlhelper markers`) that marks
+up the first procedure in a script as a server-side grid procedure. It adds only marker comments, each on its own line
+at the indent of the grid's `SELECT`, and removes that `SELECT`'s `;`; everything else is checked to be untouched. The
+cases are in `tests/SqlHelper.Formatting.Tests/MarkerCases`.
+
+```sql
+CREATE PROCEDURE dbo.WidgetGridGet
+	@UserId INT
+AS
+BEGIN
+	--##ServerSideMark
+	SET NOCOUNT ON;
+
+	--##ServerSideFinalSqlStart
+
+	SELECT
+		w.WidgetId
+	FROM
+		dbo.Widget w
+
+	--##ServerSideFinalSqlEnd
+	--##ServerSideMark
+END;
+```
+
+- The procedure's last statement is the grid's `SELECT`. If it isn't a `SELECT` (or the script has no procedure), the
+  command refuses and changes nothing.
+- `--##ServerSideMark` goes on the line directly after the body's `BEGIN`, or after `AS` when the body has no
+  `BEGIN … END`, and again directly after `--##ServerSideFinalSqlEnd`.
+- `--##ServerSideFinalSqlStart` goes at the start of the `SELECT`'s line followed by a blank line, so anything above the
+  `SELECT` (a blank line, a comment) stays above the marker. `--##ServerSideFinalSqlEnd` goes after the end of the
+  `SELECT`'s last line, after a blank line.
+- Only missing markers are added; ones already there are left exactly where they are. The `;` is removed whether or not
+  any markers were added (see Semicolons).
+- The `BEGIN` / `AS` must end its line, and the `SELECT` must start and end its own lines, or the command refuses.

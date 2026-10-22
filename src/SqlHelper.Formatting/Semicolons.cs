@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Microsoft.SqlServer.TransactSql.ScriptDom;
+using SqlHelper.Formatting.ServerSide;
 using SqlHelper.Formatting.Verification;
 
 namespace SqlHelper.Formatting
@@ -19,8 +20,6 @@ namespace SqlHelper.Formatting
     /// </remarks>
     public static class Semicolons
     {
-        const string FinalSqlEndMarker = "##ServerSideFinalSqlEnd";
-
         public static FormatResult Add(string sql)
         {
             sql = sql ?? "";
@@ -43,9 +42,9 @@ namespace SqlHelper.Formatting
                 foreach (var statement in script.Batches.SelectMany(b => b.Statements)) CollectEnds(statement, ends);
 
                 var removals = new SortedSet<int>();
-                foreach (int marker in Enumerable.Range(0, tokens.Count).Where(i => IsFinalSqlEndMarker(tokens[i])))
+                foreach (int marker in Enumerable.Range(0, tokens.Count).Where(i => Marker.Is(tokens[i], Marker.FinalSqlEnd)))
                 {
-                    int previous = PreviousCode(tokens, marker);
+                    int previous = TokenScan.PreviousCode(tokens, marker);
                     if (previous < 0) continue;
                     ends.Remove(previous);
                     if (tokens[previous].TokenType == TSqlTokenType.Semicolon) removals.Add(previous);
@@ -109,13 +108,9 @@ namespace SqlHelper.Formatting
         static bool NeedsSemicolon(IList<TSqlParserToken> tokens, int end)
         {
             if (tokens[end].TokenType == TSqlTokenType.Semicolon) return false;
-            int next = NextCode(tokens, end);
+            int next = TokenScan.NextCode(tokens, end);
             return next < 0 || (tokens[next].TokenType != TSqlTokenType.Semicolon && tokens[next].TokenType != TSqlTokenType.Else);
         }
-
-        static bool IsFinalSqlEndMarker(TSqlParserToken token) =>
-            token.TokenType == TSqlTokenType.SingleLineComment
-            && string.Equals(token.Text.TrimEnd('\r', '\n').Substring(2).Trim(), FinalSqlEndMarker, StringComparison.OrdinalIgnoreCase);
 
         static string Edit(string sql, IList<TSqlParserToken> tokens, IEnumerable<int> insertions, IEnumerable<int> removals)
         {
@@ -140,24 +135,6 @@ namespace SqlHelper.Formatting
             }
             return expected;
         }
-
-        static int NextCode(IList<TSqlParserToken> tokens, int index)
-        {
-            for (int i = index + 1; i < tokens.Count; i++)
-                if (IsCode(tokens[i])) return i;
-            return -1;
-        }
-
-        static int PreviousCode(IList<TSqlParserToken> tokens, int index)
-        {
-            for (int i = index - 1; i >= 0; i--)
-                if (IsCode(tokens[i])) return i;
-            return -1;
-        }
-
-        static bool IsCode(TSqlParserToken token) =>
-            token.TokenType != TSqlTokenType.WhiteSpace && token.TokenType != TSqlTokenType.EndOfFile
-            && token.TokenType != TSqlTokenType.SingleLineComment && token.TokenType != TSqlTokenType.MultilineComment;
 
         static TSqlParser CreateParser() => new TSql170Parser(initialQuotedIdentifiers: true);
     }

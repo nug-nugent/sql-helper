@@ -16,12 +16,15 @@ namespace SqlHelper.Cli
         const string Usage =
 @"Usage: sqlhelper format [file]
        sqlhelper semicolons [file]
+       sqlhelper markers [file]
        sqlhelper header [file] --initials XX [--note text] [--date dd/MM/yyyy]
 
 format      Formats T-SQL in the house style.
 semicolons  Ends every statement with a semicolon. The statement before a
             --##ServerSideFinalSqlEnd comment is left without one.
-header      Adds the house comment header to the first procedure, function or view,
+markers     Adds the server-side grid markers that are missing from the first
+            procedure, whose last statement must be the grid's SELECT.
+header     Adds the house comment header to the first procedure, function or view,
             or adds a history line to the one it has. An SSMS template header is
             converted. --note is the text of the history line (default: none, left
             for you to finish); --date defaults to today.
@@ -33,15 +36,15 @@ Exit codes:
   0  done
   1  bad arguments or unreadable file
   2  the SQL was left unchanged (it doesn't parse, there's nothing to put a header
-     on, or the result failed SQL Helper's safety check); the reason goes to
-     standard error and nothing to standard output";
+     or markers on, or the result failed SQL Helper's safety check); the reason
+     goes to standard error and nothing to standard output";
 
         public static int Main(string[] args)
         {
             Console.InputEncoding = Encoding.UTF8;
             Console.OutputEncoding = new UTF8Encoding(false);
 
-            if (args.Length == 0 || (args[0] != "format" && args[0] != "semicolons" && args[0] != "header")
+            if (args.Length == 0 || (args[0] != "format" && args[0] != "semicolons" && args[0] != "markers" && args[0] != "header")
                 || !TryParseArguments(args, out string file, out Dictionary<string, string> options)
                 || !TryCreateCommand(args[0], options, out Func<string, (bool Succeeded, string Text, IReadOnlyList<string> Errors)> run))
             {
@@ -104,12 +107,13 @@ Exit codes:
                 return true;
             }
 
-            if (command == "semicolons")
+            if (command == "semicolons" || command == "markers")
             {
                 if (options.Count > 0) return false;
+                Func<string, FormatResult> add = command == "semicolons" ? (Func<string, FormatResult>)Semicolons.Add : ServerSideMarkers.Add;
                 run = sql =>
                 {
-                    var result = Semicolons.Add(sql);
+                    var result = add(sql);
                     return (result.Succeeded, result.Text, result.Errors);
                 };
                 return true;
