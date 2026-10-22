@@ -15,7 +15,10 @@ namespace SqlHelper.VisualStudio
     [PackageRegistration(UseManagedResourcesOnly = true, AllowsBackgroundLoading = true)]
     [InstalledProductRegistration("SQL Helper", "Formats T-SQL and adds standard comment headers.", BuildVersion.Value)]
     [ProvideMenuResource("Menus.ctmenu", 1)]
-    [ProvideOptionPage(typeof(GeneralOptionsPage), "SQL Helper", "General", 0, 0, true)]
+    // The classic options page, for Visual Studio 2022 and classic-mode Options. Where Unified Settings is on
+    // (VS 2026, SSMS 22) it is hidden and registration.json's settings are shown instead.
+    [ProvideOptionPage(typeof(GeneralOptionsPage), "SQL Helper", "General", 0, 0, true, IsInUnifiedSettings = true)]
+    [ProvideSettingsManifest]
     // Lets the host load our own copy of ScriptDom when it hasn't already loaded one of its own.
     [ProvideBindingPath]
     [Guid(PackageIds.PackageGuidString)]

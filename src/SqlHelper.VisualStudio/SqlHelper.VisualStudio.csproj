@@ -33,6 +33,7 @@
   <ItemGroup>
     <VSCTCompile Include="SqlHelperPackage.vsct" ResourceName="Menus.ctmenu" />
     <None Include="source.extension.vsixmanifest" SubType="Designer" />
+    <Content Include="registration.json" IncludeInVSIX="true" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\LICENSE.txt" Link="LICENSE.txt" IncludeInVSIX="true" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 

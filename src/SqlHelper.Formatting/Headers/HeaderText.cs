@@ -30,8 +30,11 @@ namespace SqlHelper.Formatting.Headers
         static readonly Regex PersonName = new Regex(@"^[A-Za-z]+(\s+[A-Za-z]+)+$");
 
         static readonly Regex DashRule = new Regex(@"^-{10,}\s*$");
-        // -- AB - 01/06/2023 - PBI 10001 - Widget Summary
-        static readonly Regex DashHistoryLine = new Regex(@"^--\s*([A-Za-z]{1,4})\s*-\s*(\d{2}/\d{2}/\d{4})\s*-\s*(.*?)\s*$");
+        // -- AB - 01/06/2023 - PBI 10001 - Widget Summary, -- AB 24/11/2020 : PBI 10004, -- CD 26/12/2024 PBI-10008: …
+        // Initials and date, each followed by spaces, " - " or " : ".
+        const string DashSeparator = @"(?:\s*[-:]\s*|\s+)";
+        static readonly Regex DashHistoryLine =
+            new Regex(@"^--\s*([A-Za-z]{1,4})" + DashSeparator + @"(\d{2}/\d{2}/\d{4})" + DashSeparator + @"(.*?)\s*$");
 
         /// <summary>A <c>/* ===</c> … <c>=== */</c> block comment with an Update History section.</summary>
         public static bool IsHouseHeader(string comment)
