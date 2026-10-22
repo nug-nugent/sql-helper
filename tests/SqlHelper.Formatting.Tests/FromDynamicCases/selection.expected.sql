@@ -1,0 +1,3 @@
+EXEC (N'TRUNCATE TABLE dbo.Staging')
+
+TRUNCATE TABLE dbo.Import

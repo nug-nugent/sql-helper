@@ -1,0 +1,1 @@
+UPDATE dbo.Orders SET Status = 'Closed' WHERE Status = 'Open'

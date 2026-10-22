@@ -94,6 +94,28 @@ token is removed. As with semicolons, the expected token list (input tokens, min
 at their offsets) goes to `RoundTripCheck.FindProblem`. Marker names and matching are shared with `Semicolons` in
 `ServerSide/Marker.cs`; token scanning helpers shared by the splicing commands are in `TokenScan`.
 
+## Dynamic SQL
+
+`DynamicSql.ToDynamic` and `DynamicSql.FromDynamic` take the whole document and a selection (empty means the whole
+document) and return the whole document, because declarations outside the selection matter: their types, and the
+`DECLARE` / `SET` statements of an `@Sql` variable that goes. `Dynamic/VariableUse` collects a fragment's variable
+references (not a named `EXEC` parameter, which belongs to the procedure called), the variables it assigns and its
+declarations (procedure parameters are `DeclareVariableElement`s too); `Dynamic/Statements` finds statements and the
+statement list each sits in.
+
+- `ToDynamicConversion` requires the selection to start and end on statement boundaries and parse alone as one batch.
+  It formats the selection with `SqlFormatter`, doubles its quotes and writes the `DECLARE` and `EXEC`. Two checks:
+  the output's tokens are the input's with the selection swapped for the new code, and the `@Sql` literal's value
+  has the selection's tokens.
+- `FromDynamicConversion` looks at every `ExecuteStatement` inside the selection that sits in a statement list.
+  `EXEC (a + b)` holds its pieces as a list, which is folded into one `+` expression. An expression resolves to a
+  string when it is literals, `+` and brackets; a variable resolves through its `DECLARE` and the `SET` / `+=`
+  statements after it in the same list, which are then removed (no other use of it in the batch is allowed). A call
+  that doesn't resolve is skipped; any other problem throws a refusal for the whole command. The parameter list is
+  read by parsing `CREATE PROCEDURE p <list> AS RETURN`. Renames are made on the inner script's tokens, and the
+  whitespace between them is re-indented (so strings and comments spanning lines keep theirs). The expected tokens
+  are the input's with removed statements dropped and each call swapped for its renamed inner tokens.
+
 ## Visual Studio / SSMS extension
 
 `SqlHelper.VisualStudio` is a classic in-process `AsyncPackage` targeting .NET Framework 4.8, because `devenv.exe`

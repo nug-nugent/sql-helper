@@ -288,3 +288,52 @@ rewrites below. The cases are in `tests/SqlHelper.Formatting.Tests/CleanupCases`
     option words never get brackets.
 - Inserted and replaced keywords are uppercase; everything else keeps the case it was typed in (`left outer join`
   becomes `left join`).
+
+## Dynamic SQL
+
+Not part of formatting: two separate commands that turn statements into dynamic SQL and back. Each works on the
+selection, or the whole document when nothing is selected; variables' declarations are looked up in the whole
+document either way. The cases are in `tests/SqlHelper.Formatting.Tests/ToDynamicCases` and `FromDynamicCases`.
+
+**SQL Helper > Convert to Dynamic SQL** (`sqlhelper todynamic`) always writes a parameterised `sp_executesql` call:
+
+```sql
+	DECLARE @Sql NVARCHAR(MAX) = N'
+	SELECT
+		o.OrderId
+	FROM
+		dbo.Orders o
+	WHERE
+		o.CustomerId = @CustomerId
+		AND o.Note <> ''it''''s''
+	'
+
+	EXEC sys.sp_executesql
+		@Sql
+		, N'@CustomerId INT'
+		, @CustomerId = @CustomerId
+```
+
+- The statements are formatted in the house style and go on their own lines inside the string, at the indent of the
+  `DECLARE`, which replaces the selection where it starts. Quotes inside are doubled.
+- The string is `@Sql`, or `@Sql2`, `@Sql3`, … when that name is already declared in the batch.
+- Every variable the statements use but don't declare themselves becomes a parameter, inputs first and then `OUTPUT`
+  ones, each in order of first use, with the type it is declared with earlier in the batch (a `DECLARE` or the procedure's parameters). A table-type parameter is
+  passed `READONLY`. A variable the statements assign (`SELECT @x = …`, `SET @x = …`, `EXEC … @x OUTPUT`) is passed
+  `OUTPUT`.
+- The command refuses when a variable's declaration can't be found, when a variable is a table variable (`DECLARE @t
+  TABLE`, which `sp_executesql` can't take), or when the selection holds `GO`.
+
+**SQL Helper > Convert from Dynamic SQL** (`sqlhelper fromdynamic`) replaces each dynamic call with the statements it
+runs:
+
+- It handles `EXEC sp_executesql` / `sys.sp_executesql` (also `EXECUTE`) and `EXEC (…)`. `EXEC @Sql` without brackets
+  runs a procedure named by `@Sql`, so it is left alone.
+- The SQL must be a string literal, a concatenation of literals, or a variable whose value is built only from literals
+  (its `DECLARE … =`, `SET @Sql =` and `SET @Sql +=` statements, which are removed with the call). The variable may
+  not be used anywhere else (a `PRINT @Sql` included). Calls whose SQL is built from anything else (`QUOTENAME(@t)`)
+  are really dynamic and are left as they are; the command refuses only when it finds nothing it can convert.
+- The statements keep the string's layout, moved to the call's indent; doubled quotes are undoubled.
+- Arguments are matched to the parameter list by name or by position. A parameter passed a differently named variable
+  is renamed to that variable (`@Id = @OrderId` makes `@Id` inside `@OrderId`). A parameter passed a literal, or not
+  passed at all, makes the command refuse, as does a variable the statements declare that is already declared outside.

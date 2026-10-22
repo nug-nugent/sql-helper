@@ -2,7 +2,8 @@
 
 A T-SQL formatter for SQL Server Management Studio, Visual Studio and VS Code, with an opinionated house style. It
 also cleans up joins, keywords, aliases and brackets, adds and updates a standard comment header on procedures,
-functions and views, can end every statement with a semicolon, and adds the markers of a server-side grid procedure. Planned next: snippets.
+functions and views, can end every statement with a semicolon, adds the markers of a server-side grid procedure, and converts
+statements to and from dynamic SQL. Planned next: snippets.
 
 Parsing is done by Microsoft's [ScriptDom](https://github.com/microsoft/SqlScriptDOM), the same T-SQL parser
 Microsoft's own tools use. Formatting only ever changes whitespace and keyword case, and each of the other commands
@@ -16,9 +17,9 @@ The style is described in [docs/style-guide.md](docs/style-guide.md).
 | Path | What it is |
 | --- | --- |
 | `src/SqlHelper.Formatting` | The formatter (`netstandard2.0`, so it loads in both the VS/SSMS host and modern .NET) |
-| `src/SqlHelper.Cli` | `sqlhelper format [file]`, `sqlhelper cleanup [file]`, `sqlhelper semicolons [file]`, `sqlhelper markers [file]` and `sqlhelper header [file] --initials XX`: read a file or standard input, write to standard output |
+| `src/SqlHelper.Cli` | `sqlhelper format [file]`, `sqlhelper cleanup [file]`, `sqlhelper semicolons [file]`, `sqlhelper markers [file]`, `sqlhelper todynamic [file]`, `sqlhelper fromdynamic [file]` and `sqlhelper header [file] --initials XX`: read a file or standard input, write to standard output |
 | `src/SqlHelper.VisualStudio` | VS 2026 / SSMS 22 extension; builds `SqlHelper.VisualStudio.vsix` |
-| `tests/SqlHelper.Formatting.Tests` | Spec tests: each `Cases/*.sql` must format to exactly its `*.expected.sql`; `CleanupCases/`, `HeaderCases/`, `SemicolonCases/` and `MarkerCases/` likewise for the other commands |
+| `tests/SqlHelper.Formatting.Tests` | Spec tests: each `Cases/*.sql` must format to exactly its `*.expected.sql`; `CleanupCases/`, `HeaderCases/`, `SemicolonCases/`, `MarkerCases/`, `ToDynamicCases/` and `FromDynamicCases/` likewise for the other commands |
 | `docs/` | The [style guide](docs/style-guide.md), [how the formatter works](docs/architecture.md), and the [TODO list](docs/TODO.md) |
 
 ## Build and test
@@ -72,6 +73,13 @@ nothing else. Blocks (`BEGIN … END`, `END CATCH`) are left bare, and so is the
 adds whichever of `--##ServerSideMark`, `--##ServerSideFinalSqlStart` and `--##ServerSideFinalSqlEnd` are missing
 around its final `SELECT`, and takes that `SELECT`'s `;` off. The layout is in the
 [style guide](docs/style-guide.md#server-side-markers). It has no shortcut either (`SqlHelper.AddServerSideMarkers`).
+
+**SQL Helper > Convert to Dynamic SQL** turns the selected statements, or the whole document, into a house-formatted
+`@Sql` string run by a parameterised `sys.sp_executesql` call; every variable they use is passed, typed as it is
+declared elsewhere in the batch. **SQL Helper > Convert from Dynamic SQL** does the reverse for each `sp_executesql` or
+`EXEC (…)` call whose SQL is built only from string literals, renaming its parameters to the variables passed and
+removing the `@Sql` variable. The rules are in the [style guide](docs/style-guide.md#dynamic-sql). No shortcuts
+(`SqlHelper.ConvertToDynamicSql`, `SqlHelper.ConvertFromDynamicSql`).
 
 ### Updating from a local gallery
 

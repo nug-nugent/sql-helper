@@ -35,6 +35,7 @@ namespace SqlHelper.VisualStudio
             HeaderCommand.Initialize(this, commandService);
             SemicolonsCommand.Initialize(commandService);
             MarkersCommand.Initialize(commandService);
+            DynamicSqlCommands.Initialize(commandService);
         }
     }
 }
