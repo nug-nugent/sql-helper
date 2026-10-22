@@ -1,0 +1,4 @@
+DECLARE @Sql NVARCHAR(MAX) = N'SELECT 1'
+DECLARE @Id INT = 1
+
+/*[*/DELETE FROM dbo.Orders WHERE OrderId = @Id/*]*/

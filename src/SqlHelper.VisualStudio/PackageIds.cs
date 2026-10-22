@@ -14,5 +14,7 @@ namespace SqlHelper.VisualStudio
         public const int SemicolonsCommand = 0x0102;
         public const int MarkersCommand = 0x0103;
         public const int CleanupCommand = 0x0104;
+        public const int ToDynamicCommand = 0x0105;
+        public const int FromDynamicCommand = 0x0106;
     }
 }

@@ -77,6 +77,26 @@
           <LocCanonicalName>SqlHelper.AddServerSideMarkers</LocCanonicalName>
         </Strings>
       </Button>
+      <Button guid="guidSqlHelperCmdSet" id="ToDynamicCommand" priority="0x0500" type="Button">
+        <Parent guid="guidSqlHelperCmdSet" id="SqlHelperMenuGroup" />
+        <Icon guid="ImageCatalogGuid" id="DynamicProcedure" />
+        <CommandFlag>IconIsMoniker</CommandFlag>
+        <Strings>
+          <ButtonText>Convert to Dynamic SQL</ButtonText>
+          <CanonicalName>SqlHelper.ConvertToDynamicSql</CanonicalName>
+          <LocCanonicalName>SqlHelper.ConvertToDynamicSql</LocCanonicalName>
+        </Strings>
+      </Button>
+      <Button guid="guidSqlHelperCmdSet" id="FromDynamicCommand" priority="0x0510" type="Button">
+        <Parent guid="guidSqlHelperCmdSet" id="SqlHelperMenuGroup" />
+        <Icon guid="ImageCatalogGuid" id="DatabaseScript" />
+        <CommandFlag>IconIsMoniker</CommandFlag>
+        <Strings>
+          <ButtonText>Convert from Dynamic SQL</ButtonText>
+          <CanonicalName>SqlHelper.ConvertFromDynamicSql</CanonicalName>
+          <LocCanonicalName>SqlHelper.ConvertFromDynamicSql</LocCanonicalName>
+        </Strings>
+      </Button>
     </Buttons>
   </Commands>
 
@@ -113,6 +133,8 @@
       <IDSymbol name="SemicolonsCommand" value="0x0102" />
       <IDSymbol name="MarkersCommand" value="0x0103" />
       <IDSymbol name="CleanupCommand" value="0x0104" />
+      <IDSymbol name="ToDynamicCommand" value="0x0105" />
+      <IDSymbol name="FromDynamicCommand" value="0x0106" />
     </GuidSymbol>
   </Symbols>
 </CommandTable>

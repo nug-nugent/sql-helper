@@ -1,0 +1,1 @@
+SELECT Name FROM dbo.Customers WHERE Name LIKE 'O''%'

@@ -20,6 +20,8 @@ namespace SqlHelper.Cli
             ["cleanup"] = Cleanup.Apply,
             ["semicolons"] = Semicolons.Add,
             ["markers"] = ServerSideMarkers.Add,
+            ["todynamic"] = sql => DynamicSql.ToDynamic(sql),
+            ["fromdynamic"] = sql => DynamicSql.FromDynamic(sql),
         };
 
         const string Usage =
@@ -27,6 +29,8 @@ namespace SqlHelper.Cli
        sqlhelper cleanup [file]
        sqlhelper semicolons [file]
        sqlhelper markers [file]
+       sqlhelper todynamic [file]
+       sqlhelper fromdynamic [file]
        sqlhelper header [file] --initials XX [--note text] [--date dd/MM/yyyy]
 
 format      Formats T-SQL in the house style.
@@ -36,6 +40,10 @@ semicolons  Ends every statement with a semicolon. The statement before a
             --##ServerSideFinalSqlEnd comment is left without one.
 markers     Adds the server-side grid markers that are missing from the first
             procedure, whose last statement must be the grid's SELECT.
+todynamic   Turns the script into a parameterised sp_executesql call, typing each
+            parameter from its variable's declaration.
+fromdynamic Replaces each sp_executesql or EXEC (...) call whose SQL is built only
+            from string literals with the statements it runs.
 header     Adds the house comment header to the first procedure, function or view,
             or adds a history line to the one it has. An SSMS template header is
             converted. --note is the text of the history line (default: none, left
@@ -48,7 +56,7 @@ Exit codes:
   0  done
   1  bad arguments or unreadable file
   2  the SQL was left unchanged (it doesn't parse, there's nothing to put a header
-     or markers on, or the result failed SQL Helper's safety check); the reason
+     or markers on or nothing to convert, or the result failed SQL Helper's safety check); the reason
      goes to standard error and nothing to standard output";
 
         public static int Main(string[] args)
