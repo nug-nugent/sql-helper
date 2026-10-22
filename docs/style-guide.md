@@ -13,8 +13,9 @@ where this guide and a case disagree, one of them is a bug.
   alias names (including ones that happen to be keywords, such as `Name` or `Date`), variables, and
   schema-qualified function calls (`dbo.fn_Thing()`), which are always user-defined.
 - **What's never changed:** the tokens themselves. No keywords added or removed (`JOIN` stays `JOIN`, `INNER JOIN` stays
-  `INNER JOIN`, `AS` before an alias appears only if you wrote it), no semicolons added or removed (that's the separate Add Semicolons command), no brackets added or
-  removed, and string literals and comments are kept exactly. Formatting only changes whitespace and keyword case, plus
+  `INNER JOIN`, `AS` before an alias appears only if you wrote it), no semicolons added or removed, no brackets added or
+  removed, and string literals and comments are kept exactly. (Those are the separate Clean Up and Add Semicolons
+  commands.) Formatting only changes whitespace and keyword case, plus
   one deliberate move: a trailing comment can hop back over a comma (see Comments). The formatter checks this on every
   run, comparing code and comments separately; if the check fails it refuses and leaves the text alone.
 - **Spacing:** one space around operators (`a = 1`, `x + 1`), after commas inside a single line (`LEFT(Name, 3)`),
@@ -258,3 +259,32 @@ END;
 - Only missing markers are added; ones already there are left exactly where they are. The `;` is removed whether or not
   any markers were added (see Semicolons).
 - The `BEGIN` / `AS` must end its line, and the `SELECT` must start and end its own lines, or the command refuses.
+
+## Clean Up
+
+Not part of formatting: a separate command (**SQL Helper > Clean Up**, `sqlhelper cleanup`) that rewrites a few
+tokens into the house's preferred form. Layout is left as typed; every change is checked to be exactly one of the
+rewrites below. The cases are in `tests/SqlHelper.Formatting.Tests/CleanupCases`.
+
+- **Joins:** `JOIN` becomes `INNER JOIN`, and `OUTER` is dropped: `LEFT JOIN`, `RIGHT JOIN`, `FULL JOIN` (a join hint
+  stays: `LEFT HASH JOIN`). `CROSS JOIN` and `APPLY` are unchanged.
+- **Full keywords:** `PROC` becomes `PROCEDURE` and `TRAN` becomes `TRANSACTION`, wherever they appear. `EXECUTE` running
+  a procedure or batch becomes `EXEC`; `EXECUTE AS` and the `EXECUTE` permission are unchanged.
+- `INSERT tbl` becomes `INSERT INTO tbl`, and `DELETE tbl` becomes `DELETE FROM tbl` (a `DELETE t FROM …` already
+  has its `FROM` and is unchanged). `!=` becomes `<>`. `TOP 10` is left alone.
+- **Column aliases** are written `expr AS Alias`: `Alias = expr` is turned round, a missing `AS` is added, and a string
+  alias (`'Part Count'`) or double-quoted one becomes a name (`[Part Count]`). `SELECT @x = …` is an assignment and
+  is unchanged.
+- **Table aliases** get `AS` when it's missing, including derived tables: `dbo.Widget AS w`, `(…) AS stock`.
+- **Brackets:** a table, column, schema, procedure or alias name is bracketed exactly when it needs to be. Brackets
+  (or double quotes) come off a plain name, and are added to one that isn't plain:
+  - A plain name starts with a letter or `_` and goes on with letters, digits, `_`, `@`, `$` or `#`: `[My Column]`,
+    `[2020Sales]` and `[Reference.Country]` keep their brackets.
+  - A name that is a keyword keeps or gains brackets: `[Order]`, `[Name]`, `[Date]`, `[Type]`, `[Size]`. The keywords
+    are the ones SSMS knows, listed in `src/SqlHelper.Formatting/Rewrites/BracketedNames.txt` (non-reserved words of
+    one or two letters, such as the date parts `d` and `mm`, are left out so they can be aliases).
+  - Names starting with `#` or `@` are left as written.
+  - Only names are touched: data types (`DATE`), function names, date parts (`DATEADD(day, …)`), variables and
+    option words never get brackets.
+- Inserted and replaced keywords are uppercase; everything else keeps the case it was typed in (`left outer join`
+  becomes `left join`).

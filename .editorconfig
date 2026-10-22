@@ -13,7 +13,7 @@ charset = utf-8-bom
 indent_size = 2
 
 # Snapshot cases are compared byte-for-byte (after line-ending normalisation); never let an editor touch them.
-[tests/**/{Cases,HeaderCases,SemicolonCases,MarkerCases}/*.sql]
+[tests/**/{Cases,HeaderCases,SemicolonCases,MarkerCases,CleanupCases}/*.sql]
 indent_style = unset
 indent_size = unset
 trim_trailing_whitespace = false

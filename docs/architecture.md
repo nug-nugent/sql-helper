@@ -63,6 +63,27 @@ one (even a leading `;` on the next line), so those are skipped, as is any end f
 a `--##ServerSideFinalSqlEnd` comment gets no `;`, or loses the one it is. The edits are spliced into the original
 text, and `RoundTripCheck.FindProblem` compares the output with the input's tokens plus and minus those semicolons.
 
+## Clean Up
+
+`Cleanup.Apply` is also separate from formatting, and is the one command that rewrites code tokens other than `;`.
+Each rule produces a `TokenEdit` (`Rewrites/`): replace tokens *first* to *last* with some text, or insert text before
+a token, along with the tokens that text parses to. `TokenEdit.Apply` splices the edits into the original text and
+builds the expected token list (input tokens with the edited ranges swapped for the edits' tokens), which goes to
+`RoundTripCheck.FindProblem`, so the output must be exactly the planned edits and nothing else.
+
+- `StructuralRewrites` finds the join, keyword, `INTO` / `FROM`, `!=` and alias edits. Join keywords belong to no
+  fragment: they are the tokens between a `QualifiedJoin`'s two table references. `Alias = expr` is a
+  `SelectScalarExpression` whose `ColumnName` comes before its expression; turning it round is one edit spanning both.
+- Edits can nest (an alias turned round may hold a subquery with its own joins), so `Cleanup` works in rounds: each
+  round makes the smallest edits that don't overlap, re-parses and checks, until a round finds nothing.
+- `BracketRewrites` runs last, in its own round. It collects identifiers only from name positions (`SchemaObjectName`
+  outside a `DataTypeReference`, regular `ColumnReferenceExpression`s, aliases, column definitions, CTE names and
+  columns), because ScriptDom also uses `Identifier` for data types, function names and option words. A date part
+  (`DATEADD(day, …)`) is an `IdentifierLiteral`, so it isn't collected either.
+- `Names.Write` decides the brackets: bare for a plain identifier that is neither in `Rewrites/BracketedNames.txt` (the
+  keyword table of SSMS 22's own parser, `Microsoft.SqlServer.Management.SqlParser`, minus non-reserved words of one
+  or two letters) nor read by ScriptDom as a keyword; bracketed otherwise.
+
 ## Server-side markers
 
 `ServerSideMarkers.Add` takes the first `ProcedureStatementBody`. Its body is either one `BeginEndBlockStatement`
