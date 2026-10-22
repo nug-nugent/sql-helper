@@ -32,6 +32,8 @@ and the code before it. The result is one splice of the original text, so nothin
 - a house header (`HeaderText.IsHouseHeader`) gets a line inserted before its closing rule;
 - an SSMS template header (a run of `--` comments, one per line, between `-- ====` rules, read by
   `HeaderText.ParseSsms`) is replaced by a house header built from it;
+- a dash history block (`-- SR - 01/06/2023 - …` lines between `----------` rules, read by
+  `HeaderText.ParseDashHistory`) likewise, its lines becoming the history (both found by `FindRuledBlock`);
 - otherwise a new header is inserted at the start of the object's line.
 
 `RoundTripCheck.FindCodeProblem` then checks the code tokens (not the comments, which change on purpose) against the
