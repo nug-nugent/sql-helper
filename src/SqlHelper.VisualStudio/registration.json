@@ -1,0 +1,30 @@
+{
+  // Unified Settings (the Tools > Options of VS 2026 and SSMS 22). "legacyOptionPageId" is GeneralOptionsPage's GUID:
+  // it puts these settings in that page's place, and "migration" keeps them in step with the page's registry values,
+  // which Visual Studio 2022 and classic-mode Options still use.
+  "properties": {
+    "sqlHelper.general.initials": {
+      "type": "string",
+      "title": "Your initials",
+      "description": "Written on the history lines that Add Header adds, e.g. DH. Filled in from your Windows account name the first time, if it can be.",
+      "default": "",
+      "migration": {
+        "pass": {
+          "input": {
+            "store": "VsUserSettingsRegistry",
+            "path": "DialogPage\\SqlHelper.VisualStudio.GeneralOptionsPage\\Initials"
+          }
+        }
+      }
+    }
+  },
+  "categories": {
+    "sqlHelper": {
+      "title": "SQL Helper"
+    },
+    "sqlHelper.general": {
+      "title": "General",
+      "legacyOptionPageId": "6f1c3e2a-9b4d-4a7e-8c55-2d0b7e9a41f3"
+    }
+  }
+}

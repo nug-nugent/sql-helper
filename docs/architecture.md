@@ -66,3 +66,11 @@ already loaded satisfies our reference; `[ProvideBindingPath]` lets the host fin
 The SSMS 22 install target is `Microsoft.VisualStudio.Ssms` (setup reports the product as
 `Microsoft.VisualStudio.Product.Ssms`, version 22.x). The top-level SQL Helper menu is moved under Extensions by the
 host.
+
+Settings live in two places, kept in step by the host. VS 2026 and SSMS 22 show them through Unified Settings, from
+`registration.json` (registered by `[ProvideSettingsManifest]`); each setting's `migration` block points at the
+registry value of the classic `GeneralOptionsPage`, which Visual Studio 2022 and classic-mode Options still show, and
+`IsInUnifiedSettings` hides that page where Unified Settings is on. Code reads and writes settings only through the
+`Settings` class, which tries Unified Settings first and falls back to the page. A new setting needs a property on
+the page, a property on `Settings`, and an entry in `registration.json` whose `migration` path is
+`DialogPage\SqlHelper.VisualStudio.GeneralOptionsPage\<Property>`.

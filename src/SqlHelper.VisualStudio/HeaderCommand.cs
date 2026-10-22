@@ -74,13 +74,13 @@ namespace SqlHelper.VisualStudio
         static string Initials()
         {
             ThreadHelper.ThrowIfNotOnUIThread();
-            var page = (GeneralOptionsPage)_package.GetDialogPage(typeof(GeneralOptionsPage));
-            if (!string.IsNullOrWhiteSpace(page.Initials)) return page.Initials.Trim();
+            var settings = new Settings(_package);
+            string initials = settings.Initials;
+            if (!string.IsNullOrWhiteSpace(initials)) return initials.Trim();
 
             string derived = CommentHeader.InitialsOf(WindowsDisplayName());
             if (derived == null) return null;
-            page.Initials = derived;
-            page.SaveSettingsToStorage();
+            settings.Initials = derived;
             return derived;
         }
 
