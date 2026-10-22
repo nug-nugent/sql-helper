@@ -13,13 +13,25 @@ namespace SqlHelper.Cli
         const int ExitUsage = 1;
         const int ExitNotFormatted = 2;
 
+        /// <summary>The commands that take no options: text in, text out.</summary>
+        static readonly Dictionary<string, Func<string, FormatResult>> TextCommands = new Dictionary<string, Func<string, FormatResult>>
+        {
+            ["format"] = sql => new SqlFormatter().Format(sql),
+            ["cleanup"] = Cleanup.Apply,
+            ["semicolons"] = Semicolons.Add,
+            ["markers"] = ServerSideMarkers.Add,
+        };
+
         const string Usage =
 @"Usage: sqlhelper format [file]
+       sqlhelper cleanup [file]
        sqlhelper semicolons [file]
        sqlhelper markers [file]
        sqlhelper header [file] --initials XX [--note text] [--date dd/MM/yyyy]
 
 format      Formats T-SQL in the house style.
+cleanup     Rewrites joins, abbreviated keywords, aliases and brackets into the
+            house's preferred form, leaving the layout as it is.
 semicolons  Ends every statement with a semicolon. The statement before a
             --##ServerSideFinalSqlEnd comment is left without one.
 markers     Adds the server-side grid markers that are missing from the first
@@ -44,7 +56,7 @@ Exit codes:
             Console.InputEncoding = Encoding.UTF8;
             Console.OutputEncoding = new UTF8Encoding(false);
 
-            if (args.Length == 0 || (args[0] != "format" && args[0] != "semicolons" && args[0] != "markers" && args[0] != "header")
+            if (args.Length == 0 || (!TextCommands.ContainsKey(args[0]) && args[0] != "header")
                 || !TryParseArguments(args, out string file, out Dictionary<string, string> options)
                 || !TryCreateCommand(args[0], options, out Func<string, (bool Succeeded, string Text, IReadOnlyList<string> Errors)> run))
             {
@@ -96,24 +108,12 @@ Exit codes:
             out Func<string, (bool Succeeded, string Text, IReadOnlyList<string> Errors)> run)
         {
             run = null;
-            if (command == "format")
+            if (TextCommands.TryGetValue(command, out Func<string, FormatResult> apply))
             {
                 if (options.Count > 0) return false;
                 run = sql =>
                 {
-                    var result = new SqlFormatter().Format(sql);
-                    return (result.Succeeded, result.Text, result.Errors);
-                };
-                return true;
-            }
-
-            if (command == "semicolons" || command == "markers")
-            {
-                if (options.Count > 0) return false;
-                Func<string, FormatResult> add = command == "semicolons" ? (Func<string, FormatResult>)Semicolons.Add : ServerSideMarkers.Add;
-                run = sql =>
-                {
-                    var result = add(sql);
+                    var result = apply(sql);
                     return (result.Succeeded, result.Text, result.Errors);
                 };
                 return true;

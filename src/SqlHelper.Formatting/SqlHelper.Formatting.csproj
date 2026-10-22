@@ -15,4 +15,8 @@
     <InternalsVisibleTo Include="SqlHelper.Formatting.Tests" />
   </ItemGroup>
 
+  <ItemGroup>
+    <EmbeddedResource Include="Rewrites\BracketedNames.txt" LogicalName="SqlHelper.Formatting.BracketedNames.txt" />
+  </ItemGroup>
+
 </Project>
