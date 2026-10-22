@@ -116,6 +116,14 @@ statement list each sits in.
   whitespace between them is re-indented (so strings and comments spanning lines keep theirs). The expected tokens
   are the input's with removed statements dropped and each call swapped for its renamed inner tokens.
 
+## Clean and Format
+
+`CleanAndFormat.Apply` chains `Cleanup.Apply`, `Semicolons.Add` and `SqlFormatter.Format`, each on the previous
+step's output, and returns the original text with the first failing step's errors. Last comes
+`CommentHeader.Convert`, the same planning as `Apply` but only for an SSMS or dash block: a house header, no header
+or no object returns the text unchanged with caret -1. It runs after formatting so its caret offset is into the final
+text; the formatter leaves the block comment it writes as it is.
+
 ## Visual Studio / SSMS extension
 
 `SqlHelper.VisualStudio` is a classic in-process `AsyncPackage` targeting .NET Framework 4.8, because `devenv.exe`

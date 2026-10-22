@@ -21,7 +21,7 @@ namespace SqlHelper.Formatting
 
         /// <summary>
         /// Where an editor should put the cursor in <see cref="Text"/>: the end of the history line just added, or of the
-        /// empty description line of a new header. -1 when the call failed.
+        /// empty description line of a new header. -1 when the call failed or there was nothing to convert.
         /// </summary>
         public int CaretOffset { get; }
 
