@@ -12,5 +12,6 @@ namespace SqlHelper.VisualStudio
         public const int FormatSqlCommand = 0x0100;
         public const int HeaderCommand = 0x0101;
         public const int SemicolonsCommand = 0x0102;
+        public const int MarkersCommand = 0x0103;
     }
 }

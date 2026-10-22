@@ -77,7 +77,7 @@ namespace SqlHelper.Formatting
 
         Splice Plan(string sql, IList<TSqlParserToken> tokens, int objectStart, string initials)
         {
-            string newLine = _options.NewLine ?? LineBreakIn(sql);
+            string newLine = _options.NewLine ?? TokenScan.LineBreakIn(sql);
             string date = _options.Today.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture);
             string created = $"{date} : {initials} - Created";
             string update = $"{date} : {initials} - {_options.Note?.Trim()}";
@@ -172,13 +172,6 @@ namespace SqlHelper.Formatting
 
         static bool IsHeaderTarget(TSqlStatement statement) =>
             statement is ProcedureStatementBody || statement is FunctionStatementBody || statement is ViewStatementBody;
-
-        static string LineBreakIn(string sql)
-        {
-            int index = sql.IndexOf('\n');
-            if (index < 0) return Environment.NewLine;
-            return index > 0 && sql[index - 1] == '\r' ? "\r\n" : "\n";
-        }
 
         static TSqlParser CreateParser() => new TSql170Parser(initialQuotedIdentifiers: true);
 

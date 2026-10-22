@@ -57,6 +57,16 @@
           <LocCanonicalName>SqlHelper.AddSemicolons</LocCanonicalName>
         </Strings>
       </Button>
+      <Button guid="guidSqlHelperCmdSet" id="MarkersCommand" priority="0x0400" type="Button">
+        <Parent guid="guidSqlHelperCmdSet" id="SqlHelperMenuGroup" />
+        <Icon guid="ImageCatalogGuid" id="Bookmark" />
+        <CommandFlag>IconIsMoniker</CommandFlag>
+        <Strings>
+          <ButtonText>Add Server-Side Markers</ButtonText>
+          <CanonicalName>SqlHelper.AddServerSideMarkers</CanonicalName>
+          <LocCanonicalName>SqlHelper.AddServerSideMarkers</LocCanonicalName>
+        </Strings>
+      </Button>
     </Buttons>
   </Commands>
 
@@ -91,6 +101,7 @@
       <IDSymbol name="FormatSqlCommand" value="0x0100" />
       <IDSymbol name="HeaderCommand" value="0x0101" />
       <IDSymbol name="SemicolonsCommand" value="0x0102" />
+      <IDSymbol name="MarkersCommand" value="0x0103" />
     </GuidSymbol>
   </Symbols>
 </CommandTable>

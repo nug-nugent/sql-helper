@@ -33,6 +33,7 @@ namespace SqlHelper.VisualStudio
             FormatSqlCommand.Initialize(commandService);
             HeaderCommand.Initialize(this, commandService);
             SemicolonsCommand.Initialize(commandService);
+            MarkersCommand.Initialize(commandService);
         }
     }
 }

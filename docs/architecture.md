@@ -63,6 +63,16 @@ one (even a leading `;` on the next line), so those are skipped, as is any end f
 a `--##ServerSideFinalSqlEnd` comment gets no `;`, or loses the one it is. The edits are spliced into the original
 text, and `RoundTripCheck.FindProblem` compares the output with the input's tokens plus and minus those semicolons.
 
+## Server-side markers
+
+`ServerSideMarkers.Add` takes the first `ProcedureStatementBody`. Its body is either one `BeginEndBlockStatement`
+(markers go inside the `BEGIN`) or the statements after `AS`, and its last statement must be a `SelectStatement`.
+Markers already present are found among the comment tokens before the `SELECT` (back to the `BEGIN` / `AS`) and after
+it (up to the next code token). Missing ones are inserted at line starts and ends around the `SELECT`, and its `;`
+token is removed. As with semicolons, the expected token list (input tokens, minus the `;`, plus the marker comments
+at their offsets) goes to `RoundTripCheck.FindProblem`. Marker names and matching are shared with `Semicolons` in
+`ServerSide/Marker.cs`; token scanning helpers shared by the splicing commands are in `TokenScan`.
+
 ## Visual Studio / SSMS extension
 
 `SqlHelper.VisualStudio` is a classic in-process `AsyncPackage` targeting .NET Framework 4.8, because `devenv.exe`

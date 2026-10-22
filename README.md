@@ -1,8 +1,8 @@
 # SQL Helper
 
 A T-SQL formatter for SQL Server Management Studio, Visual Studio and VS Code, with an opinionated house style. It
-also adds and updates a standard comment header on procedures, functions and views, and can end every statement with a
-semicolon. Planned next: snippets.
+also adds and updates a standard comment header on procedures, functions and views, can end every statement with a
+semicolon, and adds the markers of a server-side grid procedure. Planned next: snippets.
 
 Parsing is done by Microsoft's [ScriptDom](https://github.com/microsoft/SqlScriptDOM), the same T-SQL parser
 Microsoft's own tools use. SQL Helper only ever changes whitespace and keyword case, and checks every result
@@ -16,9 +16,9 @@ The style is described in [docs/style-guide.md](docs/style-guide.md).
 | Path | What it is |
 | --- | --- |
 | `src/SqlHelper.Formatting` | The formatter (`netstandard2.0`, so it loads in both the VS/SSMS host and modern .NET) |
-| `src/SqlHelper.Cli` | `sqlhelper format [file]`, `sqlhelper semicolons [file]` and `sqlhelper header [file] --initials XX`: read a file or standard input, write to standard output |
+| `src/SqlHelper.Cli` | `sqlhelper format [file]`, `sqlhelper semicolons [file]`, `sqlhelper markers [file]` and `sqlhelper header [file] --initials XX`: read a file or standard input, write to standard output |
 | `src/SqlHelper.VisualStudio` | VS 2026 / SSMS 22 extension; builds `SqlHelper.VisualStudio.vsix` |
-| `tests/SqlHelper.Formatting.Tests` | Spec tests: each `Cases/*.sql` must format to exactly its `*.expected.sql`; `HeaderCases/` and `SemicolonCases/` likewise for the header and semicolon commands |
+| `tests/SqlHelper.Formatting.Tests` | Spec tests: each `Cases/*.sql` must format to exactly its `*.expected.sql`; `HeaderCases/`, `SemicolonCases/` and `MarkerCases/` likewise for the other commands |
 | `docs/` | The [style guide](docs/style-guide.md), [how the formatter works](docs/architecture.md), and the [TODO list](docs/TODO.md) |
 
 ## Build and test
@@ -62,6 +62,11 @@ nothing else. Blocks (`BEGIN … END`, `END CATCH`) are left bare, and so is the
 `--##ServerSideFinalSqlEnd` comment (one it has is removed). The rules are in the
 [style guide](docs/style-guide.md#semicolons). It has no shortcut; assign one under **Tools > Options > Keyboard**
 (`SqlHelper.AddSemicolons`).
+
+**SQL Helper > Add Server-Side Markers** marks up the procedure in the document as a server-side grid procedure: it
+adds whichever of `--##ServerSideMark`, `--##ServerSideFinalSqlStart` and `--##ServerSideFinalSqlEnd` are missing
+around its final `SELECT`, and takes that `SELECT`'s `;` off. The layout is in the
+[style guide](docs/style-guide.md#server-side-markers). It has no shortcut either (`SqlHelper.AddServerSideMarkers`).
 
 ### Updating from a local gallery
 
