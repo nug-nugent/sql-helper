@@ -53,6 +53,16 @@ line break; the break is the whitespace token that follows.
 - The `PIVOT` aggregate is a plain identifier, not a function call.
 - `GO n` (repeat the batch) is SSMS syntax, not T-SQL, and doesn't parse.
 
+## Semicolons
+
+`Semicolons.Add` is also separate from formatting. It walks each batch's statements, descending into the ones that
+hold statements (`BEGIN … END`, `TRY … CATCH`, `IF`, `WHILE`, and the bodies of procedures, functions and triggers)
+without terminating those blocks themselves, and collects the last token of every other statement, plus the
+procedure, function, view or trigger statement itself. A statement's token range already includes its `;` when it has
+one (even a leading `;` on the next line), so those are skipped, as is any end followed by `ELSE`. The code token before
+a `--##ServerSideFinalSqlEnd` comment gets no `;`, or loses the one it is. The edits are spliced into the original
+text, and `RoundTripCheck.FindProblem` compares the output with the input's tokens plus and minus those semicolons.
+
 ## Visual Studio / SSMS extension
 
 `SqlHelper.VisualStudio` is a classic in-process `AsyncPackage` targeting .NET Framework 4.8, because `devenv.exe`

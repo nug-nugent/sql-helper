@@ -15,15 +15,18 @@ namespace SqlHelper.Cli
 
         const string Usage =
 @"Usage: sqlhelper format [file]
+       sqlhelper semicolons [file]
        sqlhelper header [file] --initials XX [--note text] [--date dd/MM/yyyy]
 
-format  Formats T-SQL in the house style.
-header  Adds the house comment header to the first procedure, function or view, or
-        adds a history line to the one it has. An SSMS template header is converted.
-        --note is the text of the history line (default: none, left for you to finish);
-        --date defaults to today.
+format      Formats T-SQL in the house style.
+semicolons  Ends every statement with a semicolon. The statement before a
+            --##ServerSideFinalSqlEnd comment is left without one.
+header      Adds the house comment header to the first procedure, function or view,
+            or adds a history line to the one it has. An SSMS template header is
+            converted. --note is the text of the history line (default: none, left
+            for you to finish); --date defaults to today.
 
-Both read the given file, or standard input if no file is given, and write the
+All read the given file, or standard input if no file is given, and write the
 result to standard output. The file itself is never changed.
 
 Exit codes:
@@ -38,7 +41,7 @@ Exit codes:
             Console.InputEncoding = Encoding.UTF8;
             Console.OutputEncoding = new UTF8Encoding(false);
 
-            if (args.Length == 0 || (args[0] != "format" && args[0] != "header")
+            if (args.Length == 0 || (args[0] != "format" && args[0] != "semicolons" && args[0] != "header")
                 || !TryParseArguments(args, out string file, out Dictionary<string, string> options)
                 || !TryCreateCommand(args[0], options, out Func<string, (bool Succeeded, string Text, IReadOnlyList<string> Errors)> run))
             {
@@ -96,6 +99,17 @@ Exit codes:
                 run = sql =>
                 {
                     var result = new SqlFormatter().Format(sql);
+                    return (result.Succeeded, result.Text, result.Errors);
+                };
+                return true;
+            }
+
+            if (command == "semicolons")
+            {
+                if (options.Count > 0) return false;
+                run = sql =>
+                {
+                    var result = Semicolons.Add(sql);
                     return (result.Succeeded, result.Text, result.Errors);
                 };
                 return true;
