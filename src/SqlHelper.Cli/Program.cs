@@ -32,6 +32,7 @@ namespace SqlHelper.Cli
        sqlhelper todynamic [file]
        sqlhelper fromdynamic [file]
        sqlhelper header [file] --initials XX [--note text] [--date dd/MM/yyyy]
+       sqlhelper cleanformat [file] [--initials XX] [--note text] [--date dd/MM/yyyy]
 
 format      Formats T-SQL in the house style.
 cleanup     Rewrites joins, abbreviated keywords, aliases and brackets into the
@@ -48,6 +49,9 @@ header     Adds the house comment header to the first procedure, function or vie
             or adds a history line to the one it has. An SSMS template header is
             converted. --note is the text of the history line (default: none, left
             for you to finish); --date defaults to today.
+cleanformat Runs cleanup, semicolons and format, then converts an SSMS template
+            header or dash history block to the house header as header does
+            (which needs --initials). A house header, or none, is left alone.
 
 All read the given file, or standard input if no file is given, and write the
 result to standard output. The file itself is never changed.
@@ -64,7 +68,7 @@ Exit codes:
             Console.InputEncoding = Encoding.UTF8;
             Console.OutputEncoding = new UTF8Encoding(false);
 
-            if (args.Length == 0 || (!TextCommands.ContainsKey(args[0]) && args[0] != "header")
+            if (args.Length == 0 || (!TextCommands.ContainsKey(args[0]) && args[0] != "header" && args[0] != "cleanformat")
                 || !TryParseArguments(args, out string file, out Dictionary<string, string> options)
                 || !TryCreateCommand(args[0], options, out Func<string, (bool Succeeded, string Text, IReadOnlyList<string> Errors)> run))
             {
@@ -146,6 +150,15 @@ Exit codes:
                     default:
                         return false;
                 }
+            }
+            if (command == "cleanformat")
+            {
+                run = sql =>
+                {
+                    var result = CleanAndFormat.Apply(sql, new FormattingOptions(), headerOptions);
+                    return (result.Succeeded, result.Text, result.Errors);
+                };
+                return true;
             }
             if (string.IsNullOrWhiteSpace(headerOptions.Initials)) return false;
 

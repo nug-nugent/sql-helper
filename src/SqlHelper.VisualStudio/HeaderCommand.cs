@@ -59,8 +59,9 @@ namespace SqlHelper.VisualStudio
         /// <summary>
         /// The initials setting. When it's empty, the first time through it is filled in from the Windows account's
         /// display name (if that is a plain "First Last" name) and saved, so it shows in Tools > Options to change.
+        /// Null if it can't be.
         /// </summary>
-        static string Initials()
+        internal static string Initials()
         {
             ThreadHelper.ThrowIfNotOnUIThread();
             var settings = new Settings(_package);

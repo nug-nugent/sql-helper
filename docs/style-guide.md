@@ -260,6 +260,15 @@ END;
   any markers were added (see Semicolons).
 - The `BEGIN` / `AS` must end its line, and the `SELECT` must start and end its own lines, or the command refuses.
 
+## Clean and Format
+
+One command for everything (**SQL Helper > Clean and Format**, **Ctrl+Alt+C**, `sqlhelper cleanformat`): Clean Up,
+then Add Semicolons, then Format SQL, each checked as it is on its own. On the whole document (not a selection) a
+header in an old format, an SSMS template header or a dash history block, is then converted to the house header as
+Add Header does, with the dated history line added. A house header is left exactly as it is, with no line added, and
+a script with no header doesn't get one. If any step refuses, nothing changes. The cases are in
+`tests/SqlHelper.Formatting.Tests/CleanFormatCases`.
+
 ## Clean Up
 
 Not part of formatting: a separate command (**SQL Helper > Clean Up**, `sqlhelper cleanup`) that rewrites a few

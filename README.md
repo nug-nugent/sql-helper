@@ -17,9 +17,9 @@ The style is described in [docs/style-guide.md](docs/style-guide.md).
 | Path | What it is |
 | --- | --- |
 | `src/SqlHelper.Formatting` | The formatter (`netstandard2.0`, so it loads in both the VS/SSMS host and modern .NET) |
-| `src/SqlHelper.Cli` | `sqlhelper format [file]`, `sqlhelper cleanup [file]`, `sqlhelper semicolons [file]`, `sqlhelper markers [file]`, `sqlhelper todynamic [file]`, `sqlhelper fromdynamic [file]` and `sqlhelper header [file] --initials XX`: read a file or standard input, write to standard output |
+| `src/SqlHelper.Cli` | `sqlhelper format [file]`, `sqlhelper cleanup [file]`, `sqlhelper semicolons [file]`, `sqlhelper markers [file]`, `sqlhelper todynamic [file]`, `sqlhelper fromdynamic [file]`, `sqlhelper header [file] --initials XX` and `sqlhelper cleanformat [file] [--initials XX]`: read a file or standard input, write to standard output |
 | `src/SqlHelper.VisualStudio` | VS 2026 / SSMS 22 extension; builds `SqlHelper.VisualStudio.vsix` |
-| `tests/SqlHelper.Formatting.Tests` | Spec tests: each `Cases/*.sql` must format to exactly its `*.expected.sql`; `CleanupCases/`, `HeaderCases/`, `SemicolonCases/`, `MarkerCases/`, `ToDynamicCases/` and `FromDynamicCases/` likewise for the other commands |
+| `tests/SqlHelper.Formatting.Tests` | Spec tests: each `Cases/*.sql` must format to exactly its `*.expected.sql`; `CleanupCases/`, `CleanFormatCases/`, `HeaderCases/`, `SemicolonCases/`, `MarkerCases/`, `ToDynamicCases/` and `FromDynamicCases/` likewise for the other commands |
 | `docs/` | The [style guide](docs/style-guide.md), [how the formatter works](docs/architecture.md), and the [TODO list](docs/TODO.md) |
 
 ## Build and test
@@ -48,7 +48,12 @@ Additional Extension Galleries**: `https://github.com/nug-nugent/sql-helper/rele
 release is then offered under **Extensions > Manage Extensions > Updates**. SSMS 22 shows the same setting but doesn't
 appear to check galleries for updates, so update it by running the new `.vsix`.
 
-It adds **SQL Helper > Format SQL** (under the Extensions menu, and on the query editor's right-click menu), bound to
+**SQL Helper > Clean and Format** (**Ctrl+Alt+C**) does it all in one step: Clean Up, Add Semicolons and Format SQL
+on the selection or the whole document and, on the whole document, converts an SSMS template header or dash history
+block to the house header (adding a history line and leaving the cursor on it, as Add Header does). A house header,
+or none, is left alone. The rules are in the [style guide](docs/style-guide.md#clean-and-format).
+
+It also adds **SQL Helper > Format SQL** (under the Extensions menu, and on the query editor's right-click menu), bound to
 **Ctrl+Alt+F**. It formats the selection, or the whole document if nothing is selected, as a single undo step. If
 the SQL can't be formatted, nothing changes and a message says why.
 

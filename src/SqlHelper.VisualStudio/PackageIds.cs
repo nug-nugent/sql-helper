@@ -16,5 +16,6 @@ namespace SqlHelper.VisualStudio
         public const int CleanupCommand = 0x0104;
         public const int ToDynamicCommand = 0x0105;
         public const int FromDynamicCommand = 0x0106;
+        public const int CleanAndFormatCommand = 0x0107;
     }
 }

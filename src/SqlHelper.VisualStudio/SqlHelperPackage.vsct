@@ -37,6 +37,16 @@
           <LocCanonicalName>SqlHelper.FormatSql</LocCanonicalName>
         </Strings>
       </Button>
+      <Button guid="guidSqlHelperCmdSet" id="CleanAndFormatCommand" priority="0x0110" type="Button">
+        <Parent guid="guidSqlHelperCmdSet" id="SqlHelperMenuGroup" />
+        <Icon guid="ImageCatalogGuid" id="FormatSelection" />
+        <CommandFlag>IconIsMoniker</CommandFlag>
+        <Strings>
+          <ButtonText>Clean and Format</ButtonText>
+          <CanonicalName>SqlHelper.CleanAndFormat</CanonicalName>
+          <LocCanonicalName>SqlHelper.CleanAndFormat</LocCanonicalName>
+        </Strings>
+      </Button>
       <Button guid="guidSqlHelperCmdSet" id="CleanupCommand" priority="0x0150" type="Button">
         <Parent guid="guidSqlHelperCmdSet" id="SqlHelperMenuGroup" />
         <Icon guid="ImageCatalogGuid" id="CleanData" />
@@ -115,6 +125,7 @@
     <!-- Ctrl+Alt+F in the text editor, as in the old extension. Reassign under Tools > Options > Keyboard. -->
     <KeyBinding guid="guidSqlHelperCmdSet" id="FormatSqlCommand" editor="guidTextEditor" mod1="Control Alt" key1="F" />
     <KeyBinding guid="guidSqlHelperCmdSet" id="HeaderCommand" editor="guidTextEditor" mod1="Control Alt" key1="H" />
+    <KeyBinding guid="guidSqlHelperCmdSet" id="CleanAndFormatCommand" editor="guidTextEditor" mod1="Control Alt" key1="C" />
   </KeyBindings>
 
   <Symbols>
@@ -135,6 +146,7 @@
       <IDSymbol name="CleanupCommand" value="0x0104" />
       <IDSymbol name="ToDynamicCommand" value="0x0105" />
       <IDSymbol name="FromDynamicCommand" value="0x0106" />
+      <IDSymbol name="CleanAndFormatCommand" value="0x0107" />
     </GuidSymbol>
   </Symbols>
 </CommandTable>

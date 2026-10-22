@@ -36,12 +36,23 @@ namespace SqlHelper.Formatting
         /// <summary>Initials of a plain "First Last" name, e.g. DH for David Huggett; null for anything else.</summary>
         public static string InitialsOf(string name) => HeaderText.InitialsOf(name);
 
-        public HeaderResult Apply(string sql)
+        public HeaderResult Apply(string sql) => Run(sql, convertOnly: false);
+
+        /// <summary>
+        /// Converts an SSMS template header or dash history block into a house header, as <see cref="Apply"/> does, and
+        /// otherwise leaves the script as it is: a house header, no header, or no procedure, function or view gives back
+        /// the input with <see cref="HeaderResult.CaretOffset"/> -1. Initials are needed only when there is something to
+        /// convert.
+        /// </summary>
+        public HeaderResult Convert(string sql) => Run(sql, convertOnly: true);
+
+        HeaderResult Run(string sql, bool convertOnly)
         {
             sql = sql ?? "";
             string initials = _options.Initials?.Trim();
-            if (string.IsNullOrEmpty(initials))
-                return HeaderResult.Failure(sql, new[] { "Set your initials before adding a header." });
+            var noInitials = new[] { "Set your initials before adding a header." };
+            if (!convertOnly && string.IsNullOrEmpty(initials))
+                return HeaderResult.Failure(sql, noInitials);
 
             TSqlScript script;
             using (var reader = new StringReader(sql))
@@ -53,13 +64,19 @@ namespace SqlHelper.Formatting
 
             var target = script.Batches.SelectMany(b => b.Statements).FirstOrDefault(IsHeaderTarget);
             if (target == null)
-                return HeaderResult.Failure(sql, new[] { "There's no procedure, function or view in this script to put a header on." });
+                return convertOnly
+                    ? HeaderResult.Success(sql, -1)
+                    : HeaderResult.Failure(sql, new[] { "There's no procedure, function or view in this script to put a header on." });
 
             string output;
             int caret;
             try
             {
-                var splice = Plan(sql, script.ScriptTokenStream, target.FirstTokenIndex, initials);
+                var planned = Plan(sql, script.ScriptTokenStream, target.FirstTokenIndex, initials, convertOnly);
+                if (planned == null) return HeaderResult.Success(sql, -1);
+                if (string.IsNullOrEmpty(initials)) return HeaderResult.Failure(sql, noInitials);
+
+                var splice = planned.Value;
                 output = sql.Substring(0, splice.Start) + splice.Text + sql.Substring(splice.Start + splice.Length);
                 caret = splice.Start + splice.Caret;
             }
@@ -75,7 +92,8 @@ namespace SqlHelper.Formatting
             return HeaderResult.Success(output, caret);
         }
 
-        Splice Plan(string sql, IList<TSqlParserToken> tokens, int objectStart, string initials)
+        /// <summary>The edit to make, or null when <paramref name="convertOnly"/> and there is nothing to convert.</summary>
+        Splice? Plan(string sql, IList<TSqlParserToken> tokens, int objectStart, string initials, bool convertOnly)
         {
             string newLine = _options.NewLine ?? TokenScan.LineBreakIn(sql);
             string date = _options.Today.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture);
@@ -86,6 +104,7 @@ namespace SqlHelper.Formatting
             var house = comments.LastOrDefault(c => c.TokenType == TSqlTokenType.MultilineComment && HeaderText.IsHouseHeader(c.Text));
             if (house != null)
             {
+                if (convertOnly) return null;
                 int closingLine = house.Text.LastIndexOf('\n') + 1;
                 string line = HeaderText.BodyIndent + update + newLine;
                 return new Splice(house.Offset + closingLine, 0, line, HeaderText.BodyIndent.Length + update.Length);
@@ -113,6 +132,7 @@ namespace SqlHelper.Formatting
                 return Replace(first, last, header, header.Length - HeaderText.BottomRule.Length - newLine.Length);
             }
 
+            if (convertOnly) return null;
             string fresh = HeaderText.Build(new string[0], new[] { created }, newLine);
             int objectOffset = tokens[objectStart].Offset;
             int lineStart = objectOffset == 0 ? 0 : sql.LastIndexOf('\n', objectOffset - 1) + 1;
