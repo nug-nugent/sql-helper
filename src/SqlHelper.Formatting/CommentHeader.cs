@@ -19,6 +19,8 @@ namespace SqlHelper.Formatting
     /// <item>A house header gets a history line added at the end.</item>
     /// <item>An SSMS template header (<c>-- Author: / Create date: / Description:</c>) is rewritten as a house header,
     /// its author and date becoming the first history line, plus the added line.</item>
+    /// <item>A dash history block (<c>-- AB - 01/06/2023 - what changed</c> lines between <c>-------</c> rules) is
+    /// rewritten as a house header with those lines as its history, plus the added line.</item>
     /// <item>Otherwise a new header goes directly before the object, and any other comments stay where they are.</item>
     /// </list>
     /// </remarks>
@@ -89,7 +91,7 @@ namespace SqlHelper.Formatting
                 return new Splice(house.Offset + closingLine, 0, line, HeaderText.BodyIndent.Length + update.Length);
             }
 
-            var ssms = FindSsmsHeader(sql, comments);
+            var ssms = FindRuledBlock(sql, comments, HeaderText.IsSsmsRule, HeaderText.ParseSsms);
             if (ssms != null)
             {
                 var (first, last, parsed) = ssms.Value;
@@ -100,7 +102,15 @@ namespace SqlHelper.Formatting
                 int caret = parsed.Description.Count == 0 && !parsed.HasHistory
                     ? HeaderText.EmptyDescriptionEnd(newLine)
                     : header.Length - HeaderText.BottomRule.Length - newLine.Length;
-                return new Splice(first.Offset, last.Offset + last.Text.TrimEnd('\r', '\n').Length - first.Offset, header, caret);
+                return Replace(first, last, header, caret);
+            }
+
+            var dashes = FindRuledBlock(sql, comments, HeaderText.IsDashRule, HeaderText.ParseDashHistory);
+            if (dashes != null)
+            {
+                var (first, last, history) = dashes.Value;
+                string header = HeaderText.Build(new string[0], history.Concat(new[] { update }).ToList(), newLine);
+                return Replace(first, last, header, header.Length - HeaderText.BottomRule.Length - newLine.Length);
             }
 
             string fresh = HeaderText.Build(new string[0], new[] { created }, newLine);
@@ -111,17 +121,25 @@ namespace SqlHelper.Formatting
             return new Splice(objectOffset, 0, newLine + fresh + newLine, newLine.Length + HeaderText.EmptyDescriptionEnd(newLine));
         }
 
-        /// <summary>The last SSMS template header among the comments: a run of <c>--</c> lines, one per line, between rules.</summary>
-        static (TSqlParserToken First, TSqlParserToken Last, SsmsHeader Header)? FindSsmsHeader(string sql, List<TSqlParserToken> comments)
+        /// <summary>Replaces the comments from <paramref name="first"/> to <paramref name="last"/> with a new header.</summary>
+        static Splice Replace(TSqlParserToken first, TSqlParserToken last, string header, int caret) =>
+            new Splice(first.Offset, last.Offset + last.Text.TrimEnd('\r', '\n').Length - first.Offset, header, caret);
+
+        /// <summary>
+        /// The last block among the comments that is a run of <c>--</c> lines, one per line, between two rule lines,
+        /// whose lines <paramref name="parse"/> accepts (returns non-null for).
+        /// </summary>
+        static (TSqlParserToken First, TSqlParserToken Last, T Parsed)? FindRuledBlock<T>(string sql, List<TSqlParserToken> comments,
+            Func<string, bool> isRule, Func<IEnumerable<string>, T> parse) where T : class
         {
-            (TSqlParserToken, TSqlParserToken, SsmsHeader)? found = null;
+            (TSqlParserToken, TSqlParserToken, T)? found = null;
             for (int open = 0; open < comments.Count; open++)
             {
-                if (!IsSsmsLine(comments[open]) || !HeaderText.IsSsmsRule(comments[open].Text)) continue;
-                for (int close = open + 1; close < comments.Count && IsSsmsLine(comments[close]) && OnNextLine(sql, comments[close - 1], comments[close]); close++)
+                if (!IsLineComment(comments[open]) || !isRule(comments[open].Text)) continue;
+                for (int close = open + 1; close < comments.Count && IsLineComment(comments[close]) && OnNextLine(sql, comments[close - 1], comments[close]); close++)
                 {
-                    if (!HeaderText.IsSsmsRule(comments[close].Text)) continue;
-                    var parsed = HeaderText.ParseSsms(comments.Skip(open + 1).Take(close - open - 1).Select(c => c.Text));
+                    if (!isRule(comments[close].Text)) continue;
+                    var parsed = parse(comments.Skip(open + 1).Take(close - open - 1).Select(c => c.Text));
                     if (parsed != null) found = (comments[open], comments[close], parsed);
                     open = close;
                     break;
@@ -130,7 +148,7 @@ namespace SqlHelper.Formatting
             return found;
         }
 
-        static bool IsSsmsLine(TSqlParserToken token) => token.TokenType == TSqlTokenType.SingleLineComment;
+        static bool IsLineComment(TSqlParserToken token) => token.TokenType == TSqlTokenType.SingleLineComment;
 
         static bool OnNextLine(string sql, TSqlParserToken previous, TSqlParserToken next)
         {

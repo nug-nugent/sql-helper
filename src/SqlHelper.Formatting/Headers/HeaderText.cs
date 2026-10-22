@@ -29,6 +29,10 @@ namespace SqlHelper.Formatting.Headers
         static readonly Regex Placeholder = new Regex(@"^<[^>]*,[^>]*,[^>]*>$");
         static readonly Regex PersonName = new Regex(@"^[A-Za-z]+(\s+[A-Za-z]+)+$");
 
+        static readonly Regex DashRule = new Regex(@"^-{10,}\s*$");
+        // -- AB - 01/06/2023 - PBI 10001 - Widget Summary
+        static readonly Regex DashHistoryLine = new Regex(@"^--\s*([A-Za-z]{1,4})\s*-\s*(\d{2}/\d{2}/\d{4})\s*-\s*(.*?)\s*$");
+
         /// <summary>A <c>/* ===</c> … <c>=== */</c> block comment with an Update History section.</summary>
         public static bool IsHouseHeader(string comment)
         {
@@ -78,6 +82,28 @@ namespace SqlHelper.Formatting.Headers
 
             if ((author.Length == 0) != (created.Length == 0)) return null;
             return new SsmsHeader(author, created, description);
+        }
+
+        /// <summary>A line of ten or more dashes, which opens and closes a dash history block.</summary>
+        public static bool IsDashRule(string comment) => DashRule.IsMatch(comment.TrimEnd('\r', '\n'));
+
+        /// <summary>
+        /// Reads the lines between a dash history block's rules (<c>-- AB - 01/06/2023 - what changed</c>) as house
+        /// history lines (<c>01/06/2023 : AB - what changed</c>), or returns null if any line is anything else or
+        /// there are none. Lines that are just <c>--</c> are skipped.
+        /// </summary>
+        public static List<string> ParseDashHistory(IEnumerable<string> comments)
+        {
+            var history = new List<string>();
+            foreach (string comment in comments)
+            {
+                string line = comment.TrimEnd('\r', '\n');
+                if (line.Substring(2).Trim().Length == 0) continue;
+                var match = DashHistoryLine.Match(line);
+                if (!match.Success || match.Groups[3].Value.Length == 0) return null;
+                history.Add($"{match.Groups[2].Value} : {match.Groups[1].Value} - {match.Groups[3].Value}");
+            }
+            return history.Count > 0 ? history : null;
         }
 
         /// <summary>Initials of a plain "First Last" name, e.g. DH for David Huggett; null for anything else.</summary>
