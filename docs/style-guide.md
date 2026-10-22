@@ -196,9 +196,9 @@ CREATE PROCEDURE dbo.MatchListGet
   header. Anything else in the block (another label, author without date) means it isn't recognised: it stays as it
   is and a new header is added below it, so no text is ever lost.
 - **Dash history block** (lines of `-- <initials> - <dd/MM/yyyy> - <what changed>` between two lines of ten or more
-  dashes): converted. Each line becomes `<date> : <initials> - <what changed>`, in the same order, with the text after
-  the date copied as written (trailing spaces aside), and the new line is added after them. The description is left
-  empty. Lines that are just `--` are skipped; any other line (a full name, a short date, nothing after the date) means
+  dashes; after the initials and after the date there may be ` - `, ` : ` or just spaces): converted. Each line
+  becomes `<date> : <initials> - <what changed>`, in the same order, with the text after the date copied as written
+  (trailing spaces aside), and the new line is added after them. The description is left empty. Lines that are just `--` are skipped; any other line (a full name, a short date, nothing after the date) means
   the block isn't recognised and is kept as it is.
 - The empty description line is two tabs, and an added line with no note yet ends in `- `: both are where the cursor
   is left for typing, so they are the one exception to "no trailing whitespace".
