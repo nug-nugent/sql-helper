@@ -23,8 +23,9 @@ dotnet run --project src/SqlHelper.Cli -- format path/to/script.sql
   Poor Man's T-SQL Formatter or other copyleft sources.
 - Indent with tabs in SQL output; C# uses 4 spaces, UTF-8 with BOM.
 - Layout decisions belong in `Layouter` / `ExpressionLayout` only; token-level casing and spacing in `TokenRules`.
-- **`main` changes only through pull requests**, which must pass the Build workflow; every merge publishes a release.
-  Work on a branch and open a PR; don't push to `main`.
+- **`main` changes only through pull requests**, which must pass the Build workflow. Work on a branch and open a PR;
+  don't push to `main`. Merging doesn't release: the owner runs the Release workflow by hand when `main` is ready.
+  Never start it yourself.
 - **Never bump the version by hand.** The patch is the commit count (`Directory.Build.targets`); only
   `VersionMajorMinor` in `Directory.Build.props` is edited, and only when the owner asks.
 

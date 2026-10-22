@@ -81,15 +81,19 @@ dotnet run --project src/SqlHelper.Cli -- header path/to/proc.sql --initials DH 
 (`.github/workflows/build.yml`) has built it and passed the tests on Windows. Each run keeps the `.vsix` as a
 download, to try the change before merging.
 
-Every merge to `main` runs the **Release** workflow (`.github/workflows/release.yml`), which builds and tests again and
-publishes a GitHub release tagged `v<version>` with the `.vsix`, the command-line tool (`sqlhelper-<version>.zip`,
-needs the .NET 10 runtime) and the `atom.xml` feed for Visual Studio.
+Merging doesn't release anything. When `main` is ready to ship, run the **Release** workflow
+(`.github/workflows/release.yml`) by hand: **Actions > Release > Run workflow**, on `main`. It builds and tests again
+and publishes a GitHub release tagged `v<version>` with the `.vsix`, the command-line tool (`sqlhelper-<version>.zip`,
+needs the .NET 10 runtime) and the `atom.xml` feed for Visual Studio. Its notes list the pull requests merged since
+the last release. It refuses to run if nothing has been merged since then.
 
 ### Versions
 
 Versions are `<major>.<minor>.<patch>`. Major and minor are `VersionMajorMinor` in `Directory.Build.props`; change them
 there by hand. The patch is the number of commits on the branch being built, so every merge to `main` produces a
-higher one; it is never set by hand. Local builds work it out the same way from git.
+higher one; it is never set by hand, and releases skip the numbers of merges that weren't released. Local builds work
+it out the same way from git, and Debug builds of the `.vsix` add a fourth part that rises every minute, so a build
+with uncommitted changes still installs over the last one.
 
 ## Command-line exit codes
 
