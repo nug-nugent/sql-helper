@@ -20,7 +20,7 @@
       <Group guid="guidSqlHelperCmdSet" id="SqlHelperMenuGroup" priority="0x0100">
         <Parent guid="guidSqlHelperCmdSet" id="SqlHelperMenu" />
       </Group>
-      <!-- Right-click menu in the code / query editor -->
+      <!-- Right-click menu in the code editor; placed in SSMS's query editor below. Holds the SQL Helper submenu. -->
       <Group guid="guidSqlHelperCmdSet" id="EditorContextMenuGroup" priority="0x0600">
         <Parent guid="guidSHLMainMenu" id="IDM_VS_CTXT_CODEWIN" />
       </Group>
@@ -51,11 +51,13 @@
   </Commands>
 
   <CommandPlacements>
-    <CommandPlacement guid="guidSqlHelperCmdSet" id="FormatSqlCommand" priority="0x0100">
+    <!-- The same SQL Helper menu again as a right-click submenu, so new commands only need adding to it once. -->
+    <CommandPlacement guid="guidSqlHelperCmdSet" id="SqlHelperMenu" priority="0x0100">
       <Parent guid="guidSqlHelperCmdSet" id="EditorContextMenuGroup" />
     </CommandPlacement>
-    <CommandPlacement guid="guidSqlHelperCmdSet" id="HeaderCommand" priority="0x0200">
-      <Parent guid="guidSqlHelperCmdSet" id="EditorContextMenuGroup" />
+    <!-- SSMS's query editor has its own right-click menu rather than the code editor's. -->
+    <CommandPlacement guid="guidSqlHelperCmdSet" id="EditorContextMenuGroup" priority="0x0600">
+      <Parent guid="guidSqlEditorContextMenu" id="SqlEditorContextMenu" />
     </CommandPlacement>
   </CommandPlacements>
 
@@ -68,6 +70,10 @@
   <Symbols>
     <GuidSymbol name="guidSqlHelperPackage" value="{d476471b-7c48-48a7-8be0-451c4290ae08}" />
     <GuidSymbol name="guidTextEditor" value="{8b382828-6202-11d1-8870-0000f87579d2}" />
+    <!-- SSMS's query editor right-click menu, as SSMS 22's own formatter extension places itself (id 80 decimal). -->
+    <GuidSymbol name="guidSqlEditorContextMenu" value="{33f13ac3-80bb-4ecb-85bc-225435603a5e}">
+      <IDSymbol name="SqlEditorContextMenu" value="0x0050" />
+    </GuidSymbol>
     <GuidSymbol name="guidSqlHelperCmdSet" value="{2de80807-30c5-4fd7-81ef-a3cd5102261d}">
       <IDSymbol name="SqlHelperMenu" value="0x1001" />
       <IDSymbol name="SqlHelperMenuGroup" value="0x1002" />

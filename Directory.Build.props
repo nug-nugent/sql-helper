@@ -6,7 +6,9 @@
     <!--
       The version is <VersionMajorMinor>.<patch>, where the patch is the number of commits on the branch being built
       (so every merge to main gets a higher one). Releases pass VersionPatch explicitly; local builds work it out from
-      git in Directory.Build.targets. Change major or minor here; never set the patch by hand.
+      git in Directory.Build.targets. Change major or minor here; never set the patch by hand. Debug builds of the
+      .vsix (only) add a fourth part that rises every minute, so an uncommitted change still installs over the last
+      build; see GetVsixVersion in SqlHelper.VisualStudio.csproj.
     -->
     <VersionMajorMinor>2.2</VersionMajorMinor>
     <Version Condition="'$(VersionPatch)' != ''">$(VersionMajorMinor).$(VersionPatch)</Version>

@@ -1,12 +1,12 @@
-# Every push to main (in practice, every merged pull request): build, test, and publish a GitHub release tagged
-# v<major>.<minor>.<commit count>, with the .vsix, the command-line tool and an atom.xml extension feed attached.
-# The notes are build/release-notes.md (how to install) followed by GitHub's generated list of merged pull requests.
+# Run by hand (Actions > Release > Run workflow, on main) when main is ready to ship; merging doesn't release. Builds,
+# tests, and publishes a GitHub release tagged v<major>.<minor>.<commit count>, with the .vsix, the command-line tool
+# and an atom.xml extension feed attached. The notes are build/release-notes.md (how to install) followed by GitHub's
+# generated list of the pull requests merged since the last release.
 # Visual Studio can follow https://github.com/<owner>/<repo>/releases/latest/download/atom.xml to update itself.
 name: Release
 
 on:
-  push:
-    branches: [main]
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -18,6 +18,8 @@ concurrency:
 
 jobs:
   release:
+    # Releases come from main only, whichever branch the run was started on.
+    if: github.ref == 'refs/heads/main'
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v5
@@ -35,6 +37,10 @@ jobs:
           [xml] $props = Get-Content Directory.Build.props
           $majorMinor = $props.Project.PropertyGroup.VersionMajorMinor | Where-Object { $_ } | Select-Object -First 1
           $patch = git rev-list --count HEAD
+          if (git tag --list "v$majorMinor.$patch") {
+            Write-Error "v$majorMinor.$patch is already released; nothing has been merged into main since."
+            exit 1
+          }
           "patch=$patch" >> $env:GITHUB_OUTPUT
           "version=$majorMinor.$patch" >> $env:GITHUB_OUTPUT
           Write-Host "Version $majorMinor.$patch"
