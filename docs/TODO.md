@@ -13,3 +13,7 @@ Roughly in priority order.
 - [ ] **Cursor declarations**: `DECLARE … CURSOR FOR SELECT …` is currently left as written; lay out its `SELECT`.
 - [ ] **`GO n`** (SSMS's repeat-batch syntax) isn't T-SQL, so ScriptDom rejects scripts containing it and they're
   left unformatted. Could strip the count before parsing and restore it after.
+- [ ] **Automatic updates**: have the `.vsix` register its own extension gallery (a `.pkgdef` writing
+  `ExtensionManager\Repositories\{guid}` with `"Protocol"="Atom Feed"`) and have the release workflow publish an Atom
+  feed (e.g. on GitHub Pages) pointing at the latest `.vsix`, so SSMS and VS pick up new releases after the first
+  manual install. Works whether or not SSMS checks the VS Marketplace.
