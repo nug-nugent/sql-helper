@@ -1,8 +1,17 @@
 <Project>
 
-  <!-- Local builds: the version's patch is the commit count of HEAD (see Directory.Build.props). -->
+  <!-- Local builds: the version's patch is the commit count of where HEAD meets origin/main, or of HEAD itself when
+       there is no origin/main (see Directory.Build.props). -->
   <Target Name="SetVersionFromGit" BeforeTargets="GetAssemblyVersion;PrepareForBuild" Condition="'$(VersionPatch)' == ''">
-    <Exec Command="git rev-list --count HEAD" WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true"
+    <Exec Command="git merge-base HEAD origin/main" WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true"
+          IgnoreExitCode="true" StandardOutputImportance="low" StandardErrorImportance="low">
+      <Output TaskParameter="ConsoleOutput" PropertyName="_GitMergeBase" />
+    </Exec>
+    <PropertyGroup>
+      <_GitCountFrom>HEAD</_GitCountFrom>
+      <_GitCountFrom Condition="$([System.Text.RegularExpressions.Regex]::IsMatch('$(_GitMergeBase)', '^[0-9a-f]{40}$'))">$(_GitMergeBase)</_GitCountFrom>
+    </PropertyGroup>
+    <Exec Command="git rev-list --count $(_GitCountFrom)" WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true"
           IgnoreExitCode="true" StandardOutputImportance="low" StandardErrorImportance="low">
       <Output TaskParameter="ConsoleOutput" PropertyName="_GitCommitCount" />
     </Exec>

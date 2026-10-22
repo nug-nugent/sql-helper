@@ -90,10 +90,11 @@ the last release. It refuses to run if nothing has been merged since then.
 ### Versions
 
 Versions are `<major>.<minor>.<patch>`. Major and minor are `VersionMajorMinor` in `Directory.Build.props`; change them
-there by hand. The patch is the number of commits on the branch being built, so every merge to `main` produces a
-higher one; it is never set by hand, and releases skip the numbers of merges that weren't released. Local builds work
-it out the same way from git, and Debug builds of the `.vsix` add a fourth part that rises every minute, so a build
-with uncommitted changes still installs over the last one.
+there by hand. The patch is the number of commits on `main`, so every merge produces a higher one; it is never set by
+hand, and releases skip the numbers of merges that weren't released. Local builds count only up to where the branch
+left `origin/main` (fetch to bring it up to date), so a release made after the branch is merged always installs over
+them. Debug builds of the `.vsix` add a fourth part that rises every minute, so a build with uncommitted changes still
+installs over the last one.
 
 ## Command-line exit codes
 
