@@ -13,7 +13,7 @@ where this guide and a case disagree, one of them is a bug.
   alias names (including ones that happen to be keywords, such as `Name` or `Date`), variables, and
   schema-qualified function calls (`dbo.fn_Thing()`), which are always user-defined.
 - **What's never changed:** the tokens themselves. No keywords added or removed (`JOIN` stays `JOIN`, `INNER JOIN` stays
-  `INNER JOIN`, `AS` before an alias appears only if you wrote it), no semicolons added or removed, no brackets added or
+  `INNER JOIN`, `AS` before an alias appears only if you wrote it), no semicolons added or removed (that's the separate Add Semicolons command), no brackets added or
   removed, and string literals and comments are kept exactly. Formatting only changes whitespace and keyword case, plus
   one deliberate move: a trailing comment can hop back over a comma (see Comments). The formatter checks this on every
   run, comparing code and comments separately; if the check fails it refuses and leaves the text alone.
@@ -202,3 +202,21 @@ CREATE PROCEDURE dbo.MatchListGet
   the block isn't recognised and is kept as it is.
 - The empty description line is two tabs, and an added line with no note yet ends in `- `: both are where the cursor
   is left for typing, so they are the one exception to "no trailing whitespace".
+
+## Semicolons
+
+Not part of formatting: a separate command (**SQL Helper > Add Semicolons**, `sqlhelper semicolons`) that terminates
+every statement in the script with `;`. It changes only semicolons; everything else is checked to be untouched. The
+cases are in `tests/SqlHelper.Formatting.Tests/SemicolonCases`.
+
+- The `;` goes directly after the statement's last token, before any trailing comment: `SET @x = 1; -- note`.
+- Statements get one, including a single statement under `IF`, `ELSE` or `WHILE` (`RETURN;`, `IF @x = 5 BREAK;`).
+  Blocks don't: `BEGIN … END`, `BEGIN TRY … END TRY`, `BEGIN CATCH … END CATCH` and the `END` of a `WHILE` or `IF`
+  stay bare. The exception is a `CREATE` / `ALTER` of a procedure, function, view or trigger, which is itself a statement:
+  its closing `END` becomes `END;`. One that ends with a plain statement (`CREATE VIEW … AS SELECT …`) gets a single `;`.
+- Never before `ELSE`: a single statement under `IF` that is followed by `ELSE` stays bare.
+- A statement already terminated is left as written, including a leading `;` on the next line (`;THROW`, `;WITH`),
+  which terminates the statement before it.
+- **Server-side final SQL:** the last statement before a `--##ServerSideFinalSqlEnd` comment (with only whitespace and
+  comments between them) is never terminated, and a `;` it already has is removed. The marker is matched ignoring
+  case and any spaces after the `--`.

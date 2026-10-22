@@ -47,6 +47,16 @@
           <LocCanonicalName>SqlHelper.AddHeader</LocCanonicalName>
         </Strings>
       </Button>
+      <Button guid="guidSqlHelperCmdSet" id="SemicolonsCommand" priority="0x0300" type="Button">
+        <Parent guid="guidSqlHelperCmdSet" id="SqlHelperMenuGroup" />
+        <Icon guid="ImageCatalogGuid" id="Add" />
+        <CommandFlag>IconIsMoniker</CommandFlag>
+        <Strings>
+          <ButtonText>Add Semicolons</ButtonText>
+          <CanonicalName>SqlHelper.AddSemicolons</CanonicalName>
+          <LocCanonicalName>SqlHelper.AddSemicolons</LocCanonicalName>
+        </Strings>
+      </Button>
     </Buttons>
   </Commands>
 
@@ -80,6 +90,7 @@
       <IDSymbol name="EditorContextMenuGroup" value="0x1003" />
       <IDSymbol name="FormatSqlCommand" value="0x0100" />
       <IDSymbol name="HeaderCommand" value="0x0101" />
+      <IDSymbol name="SemicolonsCommand" value="0x0102" />
     </GuidSymbol>
   </Symbols>
 </CommandTable>

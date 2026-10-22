@@ -3,7 +3,7 @@ using System.Collections.Generic;
 namespace SqlHelper.Formatting
 {
     /// <summary>
-    /// The outcome of <see cref="SqlFormatter.Format"/>. When <see cref="Succeeded"/> is false, <see cref="Text"/> is the
+    /// The outcome of <see cref="SqlFormatter.Format"/> and <see cref="Semicolons.Add"/>. When <see cref="Succeeded"/> is false, <see cref="Text"/> is the
     /// original input unchanged and <see cref="Errors"/> says why.
     /// </summary>
     public sealed class FormatResult

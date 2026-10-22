@@ -48,18 +48,7 @@ namespace SqlHelper.VisualStudio
                 return;
             }
 
-            // Replace only the part that changed, so the rest of the document (and its scroll position) is undisturbed.
-            int prefix = 0;
-            while (prefix < text.Length && prefix < result.Text.Length && text[prefix] == result.Text[prefix]) prefix++;
-            int suffix = 0;
-            while (suffix < text.Length - prefix && suffix < result.Text.Length - prefix
-                && text[text.Length - 1 - suffix] == result.Text[result.Text.Length - 1 - suffix]) suffix++;
-
-            using (var edit = view.TextBuffer.CreateEdit())
-            {
-                edit.Replace(prefix, text.Length - prefix - suffix, result.Text.Substring(prefix, result.Text.Length - prefix - suffix));
-                edit.Apply();
-            }
+            ActiveEditor.ReplaceChanged(view, 0, text, result.Text);
 
             var caret = new SnapshotPoint(view.TextBuffer.CurrentSnapshot, result.CaretOffset);
             view.Selection.Clear();

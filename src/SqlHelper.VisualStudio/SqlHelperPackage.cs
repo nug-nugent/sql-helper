@@ -32,6 +32,7 @@ namespace SqlHelper.VisualStudio
             await ActiveEditor.InitializeAsync(this);
             FormatSqlCommand.Initialize(commandService);
             HeaderCommand.Initialize(this, commandService);
+            SemicolonsCommand.Initialize(commandService);
         }
     }
 }

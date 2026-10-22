@@ -48,6 +48,27 @@ namespace SqlHelper.VisualStudio
             return Environment.NewLine;
         }
 
+        /// <summary>
+        /// Replaces <paramref name="text"/>, found at <paramref name="start"/> in the view's buffer, with
+        /// <paramref name="newText"/> as a single undo step, touching only the part that differs so the rest of the
+        /// document (and its scroll position) is undisturbed.
+        /// </summary>
+        public static void ReplaceChanged(ITextView view, int start, string text, string newText)
+        {
+            int prefix = 0;
+            while (prefix < text.Length && prefix < newText.Length && text[prefix] == newText[prefix]) prefix++;
+            int suffix = 0;
+            while (suffix < text.Length - prefix && suffix < newText.Length - prefix
+                && text[text.Length - 1 - suffix] == newText[newText.Length - 1 - suffix]) suffix++;
+            if (prefix == text.Length && prefix == newText.Length) return;
+
+            using (var edit = view.TextBuffer.CreateEdit())
+            {
+                edit.Replace(start + prefix, text.Length - prefix - suffix, newText.Substring(prefix, newText.Length - prefix - suffix));
+                edit.Apply();
+            }
+        }
+
         public static void ShowMessage(string message, OLEMSGICON icon)
         {
             VsShellUtilities.ShowMessageBox(_package, message, Title, icon, OLEMSGBUTTON.OLEMSGBUTTON_OK, OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
