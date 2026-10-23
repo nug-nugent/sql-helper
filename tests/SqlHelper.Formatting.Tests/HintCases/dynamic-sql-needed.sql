@@ -1,0 +1,10 @@
+EXEC ('CREATE VIEW dbo.V AS SELECT a FROM dbo.T');
+EXEC sys.sp_executesql N'CREATE SCHEMA Reporting';
+EXEC ('USE Archive; SELECT a FROM dbo.T');
+EXEC ('CREATE TABLE #Work (a INT); INSERT INTO #Work (a) VALUES (1)');
+EXEC ('SET ANSI_WARNINGS OFF; SELECT a FROM dbo.T');
+EXEC ('SELECT a FROM dbo.T') AT ArchiveServer;
+EXEC ('SELECT a FROM dbo.T WITH (NEW SYNTAX');
+GO
+ALTER TABLE dbo.T ADD c INT NULL;
+EXEC ('UPDATE dbo.T SET c = 0');

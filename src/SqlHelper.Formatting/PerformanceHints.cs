@@ -38,6 +38,7 @@ namespace SqlHelper.Formatting
                 LockingRules.Check(context);
                 TempTableRules.Check(context);
                 ProcedureRules.Check(context);
+                DynamicSqlRules.Check(context);
                 ModificationRules.Check(context);
                 CorrectnessRules.Check(context);
                 return HintResult.Success(context.Hints);

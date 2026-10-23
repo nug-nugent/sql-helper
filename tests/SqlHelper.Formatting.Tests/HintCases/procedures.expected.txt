@@ -3,6 +3,7 @@
 7:10: suggestion SH605: Copying @CustomerId into a local variable hides its value from the optimiser, which then plans for an average value. Use the parameter directly, unless this is a deliberate fix for parameter sniffing.
 8:2: suggestion SH605: Changing @From inside the procedure doesn't change the plan, which was made for the value passed in. Put the new value in a local variable, or use OPTION (RECOMPILE) on the statements that use it.
 11:24: suggestion SH604: Orders has no schema, so SQL Server has to work out which one each caller means, and callers with different default schemas can't share a plan. Write it as dbo.Orders (or its schema).
+13:81: warning SH611: This pastes a value into the dynamic SQL: a new plan for every value, and a way in for SQL injection. Pass it as an sp_executesql parameter instead: a @Parameter in the SQL, declared in the parameter list and passed after it.
 14:2: warning SH603: EXEC (...) runs SQL text that can't take parameters, so values are pasted into it: a new plan for every value, and a way in for SQL injection. Use sp_executesql with parameters.
 16:7: suggestion SH604: GetCustomer has no schema, so SQL Server has to work out which one each caller means. Write it as dbo.GetCustomer (or its schema).
 18:2: warning SH606: Without TRY ... CATCH or SET XACT_ABORT ON, an error part-way through can leave this transaction open, holding its locks. Wrap it in TRY ... CATCH with a ROLLBACK, or SET XACT_ABORT ON first.

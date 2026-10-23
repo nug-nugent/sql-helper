@@ -5,7 +5,7 @@ using Microsoft.SqlServer.TransactSql.ScriptDom;
 
 namespace SqlHelper.Formatting.Hints
 {
-    /// <summary>SH6xx: procedures, batches, dynamic SQL and transactions.</summary>
+    /// <summary>SH6xx: procedures, batches and transactions. The dynamic SQL ones are <see cref="DynamicSqlRules"/>.</summary>
     internal static class ProcedureRules
     {
         public static void Check(HintContext c)
@@ -18,8 +18,7 @@ namespace SqlHelper.Formatting.Hints
                     c.Warning("SH602", procedure.ProcedureReference.Name, "Procedure names starting with sp_ are looked for in master first on every call, and can clash with system procedures. Use another prefix, or none.");
                 Parameters(c, procedure);
             }
-            foreach (var strings in c.Tree.All<ExecutableStringList>())
-                c.Warning("SH603", c.Tree.Parent(strings), "EXEC (...) runs SQL text that can't take parameters, so values are pasted into it: a new plan for every value, and a way in for SQL injection. Use sp_executesql with parameters.");
+            // SH603 is in DynamicSqlRules, which knows whether the SQL is a fixed string.
             foreach (var table in c.Tree.All<NamedTableReference>()) UnqualifiedTable(c, table);
             foreach (var procedure in c.Tree.All<ExecutableProcedureReference>()) UnqualifiedProcedure(c, procedure);
             Transactions(c);

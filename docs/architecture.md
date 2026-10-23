@@ -150,7 +150,7 @@ the page, a property on `Settings`, and an entry in `registration.json` whose `m
 
 `PerformanceHints.Check` parses the script and runs the rule classes in `Hints/` (one per hundred of codes:
 `PredicateRules`, `RowByRowRules`, `QueryShapeRules`, `LockingRules`, `TempTableRules`, `ProcedureRules`,
-`ModificationRules`, `CorrectnessRules`) over it. It only reads: there is no output text and so no round-trip check.
+`ModificationRules`, `CorrectnessRules`, plus `DynamicSqlRules` for SH603, SH610 and SH611) over it. It only reads: there is no output text and so no round-trip check.
 An exception in a rule fails the whole check with a message rather than reaching the editor.
 
 - ScriptDom's tree has no parent links, and its visitor no context, so `SyntaxIndex` builds them once: every
@@ -165,6 +165,10 @@ An exception in a rule fails the whole check with a message rather than reaching
 - Quirks: `SELECT … INTO` belongs to the `SelectStatement`, not its `QuerySpecification`. A `MAXDOP 1` or `FAST 10`
   hint's fragment covers only the number, so `LockingRules` places it on the keyword token before
   (`HintContext.AddAtToken`). `INSERT … DEFAULT VALUES` has a `ValuesInsertSource` with `IsDefaultValues`.
+- `DynamicSqlRules` follows a call's SQL back as Convert from Dynamic SQL does (a variable through its `DECLARE` and the
+  `SET`s after it in the call's statement list), but read-only and into pieces: literal text, or the expression that
+  isn't literal, kept so SH611 can point at it. A variable assigned anywhere else in the batch is one opaque piece. A
+  fixed string is parsed on its own to look for what needs dynamic SQL's own batch or scope.
 - In the extension, `PerformanceHintsCommand` puts the hints in the Error List through an `ErrorListProvider`,
   cleared on each run. Each task keeps a tracking span on the hint's code and the view it came from, so a double-click
   selects the code even after edits; `ActiveEditor.Focus` brings the document's window forward through its path.

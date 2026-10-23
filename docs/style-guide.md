@@ -438,13 +438,15 @@ or select lists.
 | --- | --- | --- | --- |
 | SH601 | suggestion | A procedure without `SET NOCOUNT ON` | |
 | SH602 | warning | A procedure named `sp_…` | |
-| SH603 | warning | `EXEC (…)` / `EXEC ('…' + @x)` | `sp_executesql` |
+| SH603 | warning | `EXEC (…)` whose SQL isn't a fixed string: `EXEC ('…' + @x)`, `EXEC (@Sql)` | `sp_executesql`; a fixed `EXEC ('…')`, which is SH610 |
 | SH604 | suggestion | A table or procedure name with no schema | Temp tables, table variables, CTEs, aliases (`UPDATE t … FROM dbo.Widget AS t`), `inserted` / `deleted` in a trigger, `sp_` and `xp_` system procedures |
 | SH605 | suggestion | In a procedure, a parameter copied into a local variable (`DECLARE @x INT = @p`, `SET @x = @p`) or changed (`SET @p = …`) | `OUTPUT` parameters |
 | SH606 | warning | `BEGIN TRANSACTION` outside `TRY … CATCH` with no `SET XACT_ABORT ON` before it | |
 | SH607 | warning | `BEGIN TRANSACTION` in a script with no `COMMIT` or `ROLLBACK` at all | |
 | SH608 | warning | `WAITFOR DELAY` / `TIME` after `BEGIN TRANSACTION` and before its `COMMIT` / `ROLLBACK` (in script order) | `WAITFOR (RECEIVE …)` |
 | SH609 | warning | `@@IDENTITY` | |
+| SH610 | suggestion | `EXEC (…)` or `sp_executesql` whose SQL is a fixed string: literals and `+`, or a variable built only from them by its `DECLARE` and the `SET` / `SET +=` statements after it in the same statement list (a `PRINT @Sql` in between is fine) | SQL that doesn't parse; SQL that creates or alters a procedure, function, view, trigger or schema, uses `USE`, `EXECUTE AS`, a `SET` option, or a `#temp` table (`CREATE TABLE`, `SELECT … INTO`); a batch that ran `ALTER TABLE` or `CREATE TABLE` before the call; `EXEC (…) AT server`; a variable also assigned anywhere else in the batch (under an `IF`, by a `SELECT`, as an `OUTPUT` argument), whose SQL depends on the path taken |
+| SH611 | warning | A value pasted into dynamic SQL: a non-literal piece after literal SQL that leaves a string open (an odd number of quotes) or ends with `=`, `<`, `>`, `LIKE`, `IN (`, `BETWEEN` or `TOP (` | `QUOTENAME(x)` and `QUOTENAME(x, ']')`, which make names (`QUOTENAME(x, '''')` is a value); pieces after anything else (`' AND ' + @Condition`, `'FROM dbo.' + @Table`) |
 
 ### Data changes (SH7xx)
 
