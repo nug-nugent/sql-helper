@@ -1,0 +1,4 @@
+1:17: warning SH204: A multi-statement table-valued function is a black box to the optimiser, which guesses its row count. Write it as an inline function (RETURNS TABLE AS RETURN SELECT ...) if you can.
+15:2: warning SH206: This reads inserted or deleted into a variable, which keeps only one row. A statement can change many rows at once, so write the trigger set-based, joining to inserted / deleted.
+16:13: warning SH206: This reads inserted or deleted into a variable, which keeps only one row. A statement can change many rows at once, so write the trigger set-based, joining to inserted / deleted.
+21:6: suggestion SH207: A recursive CTE that counts up builds its rows one at a time. A numbers (tally) table, or GENERATE_SERIES on SQL Server 2022 and later, is much faster.

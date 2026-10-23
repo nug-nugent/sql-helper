@@ -1,0 +1,10 @@
+1:18: suggestion SH601: The procedure doesn't SET NOCOUNT ON, so every statement sends a "rows affected" message back to the caller. Add SET NOCOUNT ON at the start.
+1:18: warning SH602: Procedure names starting with sp_ are looked for in master first on every call, and can clash with system procedures. Use another prefix, or none.
+7:10: suggestion SH605: Copying @CustomerId into a local variable hides its value from the optimiser, which then plans for an average value. Use the parameter directly, unless this is a deliberate fix for parameter sniffing.
+8:2: suggestion SH605: Changing @From inside the procedure doesn't change the plan, which was made for the value passed in. Put the new value in a local variable, or use OPTION (RECOMPILE) on the statements that use it.
+11:24: suggestion SH604: Orders has no schema, so SQL Server has to work out which one each caller means, and callers with different default schemas can't share a plan. Write it as dbo.Orders (or its schema).
+14:2: warning SH603: EXEC (...) runs SQL text that can't take parameters, so values are pasted into it: a new plan for every value, and a way in for SQL injection. Use sp_executesql with parameters.
+16:7: suggestion SH604: GetCustomer has no schema, so SQL Server has to work out which one each caller means. Write it as dbo.GetCustomer (or its schema).
+18:2: warning SH606: Without TRY ... CATCH or SET XACT_ABORT ON, an error part-way through can leave this transaction open, holding its locks. Wrap it in TRY ... CATCH with a ROLLBACK, or SET XACT_ABORT ON first.
+20:2: warning SH608: WAITFOR inside a transaction holds its locks for the whole wait, blocking anyone who needs those rows. Commit before waiting.
+26:19: warning SH609: @@IDENTITY returns the last identity value made in the session, including by a trigger on another table. SCOPE_IDENTITY() (or an OUTPUT clause) returns the one this statement made.

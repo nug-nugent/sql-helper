@@ -1,0 +1,5 @@
+3:1: warning SH701: This UPDATE has no WHERE, so it changes every row in the table. Add a WHERE if that isn't meant.
+4:1: warning SH701: This DELETE has no WHERE, so it removes every row in the table. Add a WHERE if that isn't meant; to empty a table, TRUNCATE TABLE is much faster (but needs more permissions, skips triggers and resets identity).
+7:32: suggestion SH702: UPDATE ... FROM with a join: if a target row matches more than one row of the join, SQL Server picks one of them to update from, and which one can change. Make sure the join matches at most one row per target row.
+8:1: warning SH703: MERGE without HOLDLOCK on its target can insert duplicates or fail on a key when two sessions run it at once. Add WITH (HOLDLOCK) to the target, or use separate UPDATE and INSERT statements.
+10:1: warning SH704: INSERT without a column list depends on the table's column order, and breaks (or puts values in the wrong columns) when a column is added. List the columns.

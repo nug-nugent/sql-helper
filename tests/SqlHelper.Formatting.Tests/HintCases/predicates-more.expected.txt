@@ -1,0 +1,3 @@
+5:1: suggestion SH111: Every condition here is negative (<>, NOT LIKE or NOT IN), so no index can be used to find the rows. If most rows are excluded, say which ones are wanted instead.
+14:2: suggestion SH110: An IN list of 101 values is slow to compile and hard to read. Put the values in a temp table or table-valued parameter and join to it.
+16:6: warning SH104: Arithmetic on a column stops SQL Server seeking an index on it. Move the calculation to the other side, so the column stands alone.

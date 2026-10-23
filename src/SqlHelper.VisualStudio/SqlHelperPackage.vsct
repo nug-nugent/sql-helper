@@ -107,6 +107,16 @@
           <LocCanonicalName>SqlHelper.ConvertFromDynamicSql</LocCanonicalName>
         </Strings>
       </Button>
+      <Button guid="guidSqlHelperCmdSet" id="PerformanceHintsCommand" priority="0x0600" type="Button">
+        <Parent guid="guidSqlHelperCmdSet" id="SqlHelperMenuGroup" />
+        <Icon guid="ImageCatalogGuid" id="Performance" />
+        <CommandFlag>IconIsMoniker</CommandFlag>
+        <Strings>
+          <ButtonText>Show Performance Hints</ButtonText>
+          <CanonicalName>SqlHelper.ShowPerformanceHints</CanonicalName>
+          <LocCanonicalName>SqlHelper.ShowPerformanceHints</LocCanonicalName>
+        </Strings>
+      </Button>
     </Buttons>
   </Commands>
 
@@ -147,6 +157,7 @@
       <IDSymbol name="ToDynamicCommand" value="0x0105" />
       <IDSymbol name="FromDynamicCommand" value="0x0106" />
       <IDSymbol name="CleanAndFormatCommand" value="0x0107" />
+      <IDSymbol name="PerformanceHintsCommand" value="0x0108" />
     </GuidSymbol>
   </Symbols>
 </CommandTable>

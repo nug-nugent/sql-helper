@@ -145,3 +145,26 @@ registry value of the classic `GeneralOptionsPage`, which Visual Studio 2022 and
 `Settings` class, which tries Unified Settings first and falls back to the page. A new setting needs a property on
 the page, a property on `Settings`, and an entry in `registration.json` whose `migration` path is
 `DialogPage\SqlHelper.VisualStudio.GeneralOptionsPage\<Property>`.
+
+## Performance Hints
+
+`PerformanceHints.Check` parses the script and runs the rule classes in `Hints/` (one per hundred of codes:
+`PredicateRules`, `RowByRowRules`, `QueryShapeRules`, `LockingRules`, `TempTableRules`, `ProcedureRules`,
+`ModificationRules`, `CorrectnessRules`) over it. It only reads: there is no output text and so no round-trip check.
+An exception in a rule fails the whole check with a message rather than reaching the editor.
+
+- ScriptDom's tree has no parent links, and its visitor no context, so `SyntaxIndex` builds them once: every
+  fragment's parent and its children in script order, found by reflection over the fragment properties (cached per
+  type). ScriptDom shares some fragments between properties (a `SchemaObjectName`'s `BaseIdentifier` is also in its
+  `Identifiers`); the first parent found keeps them.
+- `HintContext` holds the questions the rules share: `Filter` (is a condition part of a `WHERE` or a join `ON`,
+  through `AND` / `OR` / `NOT` / brackets), `Columns` and `OwnDescendants` (not looking inside subqueries, derived
+  tables or CTEs, which are queries of their own), `Conjuncts` / `Disjuncts`, `ExposedNames` (the aliases a `FROM`
+  makes available), `Module` and `Statement`. Rules add hints at a fragment (its start line, column, offset and
+  length); the same code at the same offset is only added once, and the list is sorted by offset, then code.
+- Quirks: `SELECT … INTO` belongs to the `SelectStatement`, not its `QuerySpecification`. A `MAXDOP 1` or `FAST 10`
+  hint's fragment covers only the number, so `LockingRules` places it on the keyword token before
+  (`HintContext.AddAtToken`). `INSERT … DEFAULT VALUES` has a `ValuesInsertSource` with `IsDefaultValues`.
+- In the extension, `PerformanceHintsCommand` puts the hints in the Error List through an `ErrorListProvider`,
+  cleared on each run. Each task keeps a tracking span on the hint's code and the view it came from, so a double-click
+  selects the code even after edits; `ActiveEditor.Focus` brings the document's window forward through its path.

@@ -1,0 +1,13 @@
+SET XACT_ABORT ON;
+BEGIN TRANSACTION;
+UPDATE dbo.Orders SET Status = 0;
+DELETE FROM dbo.Log;
+UPDATE #Work SET Done = 1;
+DELETE TOP (500) FROM dbo.Archive;
+UPDATE o SET o.Total = l.Total FROM dbo.Orders AS o INNER JOIN dbo.OrderLine AS l ON l.OrderId = o.OrderId;
+MERGE dbo.Stock AS s USING #Incoming AS i ON s.ProductId = i.ProductId WHEN MATCHED THEN UPDATE SET s.Quantity = i.Quantity;
+MERGE dbo.Price WITH (HOLDLOCK) AS p USING #Incoming AS i ON p.ProductId = i.ProductId WHEN NOT MATCHED THEN INSERT (ProductId) VALUES (i.ProductId);
+INSERT INTO dbo.Audit VALUES (1, 'x');
+INSERT INTO #Work VALUES (1);
+INSERT INTO dbo.Audit DEFAULT VALUES;
+COMMIT TRANSACTION;

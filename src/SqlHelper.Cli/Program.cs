@@ -1,9 +1,11 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Text;
 using SqlHelper.Formatting;
+using SqlHelper.Formatting.Hints;
 
 namespace SqlHelper.Cli
 {
@@ -12,6 +14,7 @@ namespace SqlHelper.Cli
         const int ExitOk = 0;
         const int ExitUsage = 1;
         const int ExitNotFormatted = 2;
+        const int ExitHintsFound = 3;
 
         /// <summary>The commands that take no options: text in, text out.</summary>
         static readonly Dictionary<string, Func<string, FormatResult>> TextCommands = new Dictionary<string, Func<string, FormatResult>>
@@ -33,6 +36,7 @@ namespace SqlHelper.Cli
        sqlhelper fromdynamic [file]
        sqlhelper header [file] --initials XX [--note text] [--date dd/MM/yyyy]
        sqlhelper cleanformat [file] [--initials XX] [--note text] [--date dd/MM/yyyy]
+       sqlhelper hints [file] [--read-uncommitted on|off]
 
 format      Formats T-SQL in the house style.
 cleanup     Rewrites joins, abbreviated keywords, aliases and brackets into the
@@ -52,6 +56,10 @@ header     Adds the house comment header to the first procedure, function or vie
 cleanformat Runs cleanup, semicolons and format, then converts an SSMS template
             header or dash history block to the house header as header does
             (which needs --initials). A house header, or none, is left alone.
+hints       Lists patterns that are often slow or wrong, one per line as
+            file:line:column: warning|suggestion SHnnn: message. The SQL is not
+            changed. --read-uncommitted on also flags SET TRANSACTION ISOLATION
+            LEVEL READ UNCOMMITTED (default off).
 
 All read the given file, or standard input if no file is given, and write the
 result to standard output. The file itself is never changed.
@@ -61,31 +69,22 @@ Exit codes:
   1  bad arguments or unreadable file
   2  the SQL was left unchanged (it doesn't parse, there's nothing to put a header
      or markers on or nothing to convert, or the result failed SQL Helper's safety check); the reason
-     goes to standard error and nothing to standard output";
+     goes to standard error and nothing to standard output
+  3  hints only: the script has hints, listed on standard output";
 
         public static int Main(string[] args)
         {
             Console.InputEncoding = Encoding.UTF8;
             Console.OutputEncoding = new UTF8Encoding(false);
 
+            if (args.Length > 0 && args[0] == "hints") return Hints(args);
+
             if (args.Length == 0 || (!TextCommands.ContainsKey(args[0]) && args[0] != "header" && args[0] != "cleanformat")
                 || !TryParseArguments(args, out string file, out Dictionary<string, string> options)
                 || !TryCreateCommand(args[0], options, out Func<string, (bool Succeeded, string Text, IReadOnlyList<string> Errors)> run))
-            {
-                Console.Error.WriteLine(Usage);
-                return ExitUsage;
-            }
+                return UsageError();
 
-            string input;
-            try
-            {
-                input = file != null ? File.ReadAllText(file) : Console.In.ReadToEnd();
-            }
-            catch (Exception ex) when (ex is IOException || ex is UnauthorizedAccessException)
-            {
-                Console.Error.WriteLine(ex.Message);
-                return ExitUsage;
-            }
+            if (!TryRead(file, out string input)) return ExitUsage;
 
             var result = run(input);
             if (!result.Succeeded)
@@ -96,6 +95,49 @@ Exit codes:
 
             Console.Out.Write(result.Text);
             return ExitOk;
+        }
+
+        static int Hints(string[] args)
+        {
+            var options = new HintOptions();
+            if (!TryParseArguments(args, out string file, out Dictionary<string, string> named)) return UsageError();
+            foreach (var option in named)
+            {
+                if (option.Key != "--read-uncommitted" || (option.Value != "on" && option.Value != "off")) return UsageError();
+                options.FlagReadUncommittedIsolation = option.Value == "on";
+            }
+            if (!TryRead(file, out string input)) return ExitUsage;
+
+            var result = PerformanceHints.Check(input, options);
+            if (!result.Succeeded)
+            {
+                foreach (var error in result.Errors) Console.Error.WriteLine(error);
+                return ExitNotFormatted;
+            }
+            string prefix = file != null ? file + ":" : "";
+            Console.Out.Write(string.Join(Environment.NewLine, result.Hints.Select(hint => prefix + hint)));
+            return result.Hints.Count > 0 ? ExitHintsFound : ExitOk;
+        }
+
+        static int UsageError()
+        {
+            Console.Error.WriteLine(Usage);
+            return ExitUsage;
+        }
+
+        static bool TryRead(string file, out string input)
+        {
+            try
+            {
+                input = file != null ? File.ReadAllText(file) : Console.In.ReadToEnd();
+                return true;
+            }
+            catch (Exception ex) when (ex is IOException || ex is UnauthorizedAccessException)
+            {
+                Console.Error.WriteLine(ex.Message);
+                input = null;
+                return false;
+            }
         }
 
         /// <summary>At most one file name, plus <c>--name value</c> pairs.</summary>

@@ -69,6 +69,16 @@ namespace SqlHelper.VisualStudio
             }
         }
 
+        /// <summary>Brings the view's document window to the front (when its path finds it) and gives the view focus.</summary>
+        public static void Focus(ITextView view, string documentPath)
+        {
+            ThreadHelper.ThrowIfNotOnUIThread();
+            if (!string.IsNullOrEmpty(documentPath)
+                && VsShellUtilities.IsDocumentOpen(_package, documentPath, Guid.Empty, out _, out _, out IVsWindowFrame frame))
+                frame.Show();
+            _editorAdapters.GetViewAdapter(view)?.SendExplicitFocus();
+        }
+
         public static void ShowMessage(string message, OLEMSGICON icon)
         {
             VsShellUtilities.ShowMessageBox(_package, message, Title, icon, OLEMSGBUTTON.OLEMSGBUTTON_OK, OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);

@@ -14,6 +14,7 @@ namespace SqlHelper.VisualStudio
     internal sealed class Settings
     {
         const string InitialsMoniker = "sqlHelper.general.initials";
+        const string ReadUncommittedMoniker = "sqlHelper.general.flagReadUncommittedIsolation";
 
         readonly AsyncPackage _package;
 
@@ -41,6 +42,20 @@ namespace SqlHelper.VisualStudio
                 var page = Page();
                 page.Initials = value;
                 page.SaveSettingsToStorage();
+            }
+        }
+
+        /// <summary>Whether Performance Hints flags SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED (SH402).</summary>
+        public bool FlagReadUncommittedIsolation
+        {
+            get
+            {
+                ThreadHelper.ThrowIfNotOnUIThread();
+                bool? value = null;
+                if (TryUnified(() => TryRead(ReadUncommittedMoniker, out value))) return value.Value;
+                var page = Page();
+                page.LoadSettingsFromStorage();
+                return page.FlagReadUncommittedIsolation;
             }
         }
 
@@ -80,6 +95,15 @@ namespace SqlHelper.VisualStudio
             ThreadHelper.ThrowIfNotOnUIThread();
             var read = Manager()?.GetReader().GetValue<string>(moniker, SettingReadOptions.NoRequirements);
             value = read?.Outcome == SettingRetrievalOutcome.Success ? read.Value ?? "" : null;
+            return value != null;
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        static bool TryRead(string moniker, out bool? value)
+        {
+            ThreadHelper.ThrowIfNotOnUIThread();
+            var read = Manager()?.GetReader().GetValue<bool>(moniker, SettingReadOptions.NoRequirements);
+            value = read?.Outcome == SettingRetrievalOutcome.Success ? read.Value : (bool?)null;
             return value != null;
         }
 

@@ -346,3 +346,122 @@ runs:
 - Arguments are matched to the parameter list by name or by position. A parameter passed a differently named variable
   is renamed to that variable (`@Id = @OrderId` makes `@Id` inside `@OrderId`). A parameter passed a literal, or not
   passed at all, makes the command refuse, as does a variable the statements declare that is already declared outside.
+
+## Performance Hints
+
+Not part of formatting: a separate command (**SQL Helper > Show Performance Hints**, `sqlhelper hints`) that reads the
+selection, or the whole document, and lists patterns that are often slow or wrong. It never changes the text. Every
+hint comes from the script alone (no schema, statistics or plan), so each one is a place to look, not a certain
+fault; the ones that need the schema or the plan (implicit conversions, missing indexes, whether a column allows
+NULLs) are left to SSMS's own tools and Copilot. The cases are in `tests/SqlHelper.Formatting.Tests/HintCases`.
+
+- Each hint has a stable code (`SH` and three digits, grouped by hundreds), a severity and a message saying what's
+  wrong and what to do instead. A **warning** is very likely a real problem; a **suggestion** depends on the data or
+  the intent.
+- A hint points at the code it's about: the function call, the `OR`, the `TOP`, the statement.
+- In the extension the hints go to the Error List (warnings as warnings, suggestions as messages), each starting with
+  its code; double-clicking one selects its code. On the command line each is a line of
+  `file:line:column: warning|suggestion SHnnn: message`.
+- **Option:** `SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED` (SH402) is flagged only when asked for (**Tools >
+  Options > SQL Helper > General > Flag READ UNCOMMITTED isolation level**, `--read-uncommitted on`); off by default.
+  A `NOLOCK` or `READUNCOMMITTED` table hint is always flagged (SH401).
+
+### Conditions that stop an index seek (SH1xx)
+
+These look only at `WHERE` and join `ON` conditions (through `AND`, `OR`, `NOT` and brackets), not `HAVING`, `CASE`
+or select lists.
+
+| Code | Severity | Flags | Not flagged |
+| --- | --- | --- | --- |
+| SH101 | warning | A function (`YEAR`, `UPPER`, `LEFT`, `CONVERT`, …) or `CASE` around a column on one side of a comparison, `LIKE`, `IN` or `BETWEEN` | `CAST(col AS DATE)` / `CONVERT(DATE, col)`, which can still seek; a function on the other side only (`col >= DATEADD(…)`); a user-defined function (SH203) |
+| SH102 | warning | `ISNULL(col, x)` or `COALESCE(col, x)` | `ISNULL(@p, col)`, which is SH107 |
+| SH103 | warning | `DATEDIFF(…, col, …)` | |
+| SH104 | warning | Arithmetic on a column: `col + 1 = @x`, `col * 1.2 > @y`, `-col > 0` | |
+| SH105 | warning | Strings built from columns: `First + ' ' + Last = @Name` (a `+` with a string literal in it) | |
+| SH106 | warning | `LIKE` with a leading `%` or `_`, including `'%' + @p` | `LIKE 'AB%'`, `LIKE '[a-c]%'` |
+| SH107 | suggestion | Optional-parameter conditions: `(@p IS NULL OR col = @p)`, `col = ISNULL(@p, col)`, `col = COALESCE(@p, col)` | The statement has `OPTION (RECOMPILE)` |
+| SH108 | suggestion | `OR` between conditions on different columns in a `WHERE` (once per `OR` chain) | `OR` on the same column (`Status = 1 OR Status = 2`) |
+| SH109 | warning | `OR` in a join's `ON` | |
+| SH110 | suggestion | An `IN` list of more than 100 values | |
+| SH111 | suggestion | A `WHERE` whose every `AND`ed condition is `<>`, `NOT LIKE` or `NOT IN (list)` | `NOT EXISTS`, which is an anti-join |
+
+### Row-by-row work (SH2xx)
+
+| Code | Severity | Flags | Not flagged |
+| --- | --- | --- | --- |
+| SH201 | warning | Any cursor (`DECLARE c CURSOR`, `SET @c = CURSOR`); the message adds "declare it `LOCAL FAST_FORWARD`" unless it is `LOCAL` and `FAST_FORWARD` or `STATIC` | |
+| SH202 | suggestion | A `WHILE` loop whose body reads a permanent table or changes data | A cursor's `@@FETCH_STATUS` loop (SH201 covers it); a batching loop (`DELETE TOP (n)` / `UPDATE TOP (n)` inside) |
+| SH203 | suggestion | A schema-qualified (user-defined) scalar function called in a select list or a `WHERE` / `ON` | `sys.` functions; methods of xml, hierarchyid and spatial values (`col.value(…)`) |
+| SH204 | warning | Defining a multi-statement table-valued function (`RETURNS @t TABLE`) | Inline functions (`RETURNS TABLE AS RETURN`) |
+| SH205 | suggestion | A subquery in the select list that refers to the outer query's tables | A subquery that doesn't (`(SELECT COUNT(*) FROM dbo.Product)`) |
+| SH206 | warning | In a trigger, reading `inserted` / `deleted` into a variable (`SELECT @x = col FROM inserted`, `SET @x = (SELECT …)`) | Aggregates (`SELECT @n = COUNT(*) FROM inserted`); `IF EXISTS (SELECT … FROM deleted)` |
+| SH207 | suggestion | A recursive CTE whose anchor reads no table (counting up numbers or dates) | Recursive CTEs over tables (hierarchies) |
+| SH208 | warning | `ORDER BY NEWID()` | |
+
+### Query shape (SH3xx)
+
+| Code | Severity | Flags | Not flagged |
+| --- | --- | --- | --- |
+| SH301 | warning in a view, procedure, function or trigger; suggestion elsewhere | `SELECT *` and `t.*` | Inside `EXISTS`; over CTEs and derived tables only (their columns are already chosen) |
+| SH302 | suggestion | A CTE read more than once in its statement | A recursive CTE's reference to itself |
+| SH303 | suggestion | `(SELECT COUNT(*) …) > 0`, `<> 0`, `>= 1` (either way round) | `COUNT` with `GROUP BY` |
+| SH304 | suggestion | `SELECT DISTINCT` on a query with joins | `DISTINCT` on one table |
+| SH305 | suggestion | `UNION` (not `ALL`) where, in some column, every branch has a different constant | |
+| SH306 | warning | `TOP 100 PERCENT … ORDER BY` in a view, subquery, derived table or CTE | The statement's own outer query |
+| SH307 | warning | `TOP` without `ORDER BY` in a query that reads a table | Inside `EXISTS`; `TOP` in `UPDATE` / `DELETE`, which can't have one |
+| SH308 | warning when some table isn't linked to the others by a `WHERE` condition (a cross join); suggestion otherwise | `FROM a, b` | |
+| SH309 | warning | A `WHERE` condition on the optional side of a `LEFT` / `RIGHT JOIN`, which turns it into an inner join | Conditions with `IS NULL`, `ISNULL()` or `COALESCE()` in them, which let the missing rows through |
+| SH310 | suggestion | A subquery in a join's `ON` | |
+
+### Hints and locking (SH4xx)
+
+| Code | Severity | Flags | Not flagged |
+| --- | --- | --- | --- |
+| SH401 | warning | `WITH (NOLOCK)` and `WITH (READUNCOMMITTED)` | |
+| SH402 | warning, only with the option on | `SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED` | Off by default |
+| SH403 | suggestion | Hints that fix the plan: `INDEX(…)`, `FORCESEEK`, `FORCESCAN`; join hints (`INNER HASH JOIN`); `OPTION (FORCE ORDER, MAXDOP, FAST, LOOP / HASH / MERGE JOIN, HASH / ORDER GROUP, CONCAT / HASH / MERGE UNION, KEEPFIXED PLAN, USE PLAN, TABLE HINT)` | `OPTION (RECOMPILE)`, `OPTIMIZE FOR`, `USE HINT` |
+| SH404 | suggestion | `CREATE PROCEDURE … WITH RECOMPILE` | |
+| SH405 | warning | `SET ROWCOUNT n` | `SET ROWCOUNT 0` |
+
+### Temp tables and table variables (SH5xx)
+
+| Code | Severity | Flags | Not flagged |
+| --- | --- | --- | --- |
+| SH501 | suggestion | A table variable filled by `INSERT … SELECT` from a table and joined later in the batch | |
+| SH502 | warning | `CREATE TABLE #t` or `SELECT … INTO #t` inside a `WHILE` loop | |
+| SH503 | suggestion | `CREATE TABLE #t` in a procedure after it has read or changed data | Inside a loop (SH502) |
+| SH504 | suggestion | A temp table filled by `SELECT … INTO` and then joined twice or more with no `CREATE INDEX` or `ALTER TABLE … ADD` on it | |
+
+### Procedures, batches and transactions (SH6xx)
+
+| Code | Severity | Flags | Not flagged |
+| --- | --- | --- | --- |
+| SH601 | suggestion | A procedure without `SET NOCOUNT ON` | |
+| SH602 | warning | A procedure named `sp_…` | |
+| SH603 | warning | `EXEC (…)` / `EXEC ('…' + @x)` | `sp_executesql` |
+| SH604 | suggestion | A table or procedure name with no schema | Temp tables, table variables, CTEs, aliases (`UPDATE t … FROM dbo.Widget AS t`), `inserted` / `deleted` in a trigger, `sp_` and `xp_` system procedures |
+| SH605 | suggestion | In a procedure, a parameter copied into a local variable (`DECLARE @x INT = @p`, `SET @x = @p`) or changed (`SET @p = …`) | `OUTPUT` parameters |
+| SH606 | warning | `BEGIN TRANSACTION` outside `TRY … CATCH` with no `SET XACT_ABORT ON` before it | |
+| SH607 | warning | `BEGIN TRANSACTION` in a script with no `COMMIT` or `ROLLBACK` at all | |
+| SH608 | warning | `WAITFOR DELAY` / `TIME` after `BEGIN TRANSACTION` and before its `COMMIT` / `ROLLBACK` (in script order) | `WAITFOR (RECEIVE …)` |
+| SH609 | warning | `@@IDENTITY` | |
+
+### Data changes (SH7xx)
+
+| Code | Severity | Flags | Not flagged |
+| --- | --- | --- | --- |
+| SH701 | warning | `UPDATE` / `DELETE` of a permanent table with no `WHERE`, no `TOP` and no join; the `DELETE` message mentions `TRUNCATE TABLE` | Temp tables and table variables |
+| SH702 | suggestion | `UPDATE … FROM` with a join | |
+| SH703 | warning | `MERGE` whose permanent target has no `HOLDLOCK` / `SERIALIZABLE` hint | Temp tables and table variables |
+| SH704 | warning | `INSERT` into a permanent table with no column list | Temp tables and table variables; `DEFAULT VALUES` |
+
+### Correctness traps (SH8xx)
+
+| Code | Severity | Flags | Not flagged |
+| --- | --- | --- | --- |
+| SH801 | warning | `NOT IN (subquery)` | `NOT IN (list)` |
+| SH802 | warning | `= NULL`, `<> NULL` | |
+| SH803 | warning | An end of day written as `23:59` / `23:59:59`: `BETWEEN … AND '… 23:59:59'`, `col <= '… 23:59:59.997'` | |
+| SH804 | warning | `CHAR`, `VARCHAR`, `NCHAR`, `NVARCHAR`, `BINARY`, `VARBINARY` without a length: 30 in `CAST` / `CONVERT`, 1 elsewhere | |
+| SH805 | suggestion | `SELECT @x = col FROM …` with no `WHERE`, `TOP`, `GROUP BY` or aggregate | `SELECT @s = @s + col` (building a string on purpose); triggers (SH206) |
+| SH806 | suggestion | A string that is just a date written `d/m/y` or `m/d/y` (`/`, `-` or `.`), optionally with a time | `CONVERT(…, '01/02/2024', 103)`, whose style says which way round it is; `'yyyymmdd'` and `'yyyy-mm-dd'` |

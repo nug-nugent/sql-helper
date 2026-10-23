@@ -16,6 +16,20 @@
           }
         }
       }
+    },
+    "sqlHelper.general.flagReadUncommittedIsolation": {
+      "type": "boolean",
+      "title": "Flag READ UNCOMMITTED isolation level",
+      "description": "Whether Show Performance Hints flags SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED, as it does a NOLOCK table hint.",
+      "default": false,
+      "migration": {
+        "pass": {
+          "input": {
+            "store": "VsUserSettingsRegistry",
+            "path": "DialogPage\\SqlHelper.VisualStudio.GeneralOptionsPage\\FlagReadUncommittedIsolation"
+          }
+        }
+      }
     }
   },
   "categories": {

@@ -6,6 +6,10 @@ Roughly in priority order.
 - [ ] **Test harness app**: paste SQL, see the formatted result side by side, and save it as a new spec case
   (`name.sql` + `name.expected.sql`) once the output is right.
 - [ ] **Snippets**: not designed yet.
+- [ ] **Performance Hints follow-ups**: a comment to silence a hint on the next statement (`-- sqlhelper-ignore SH101`);
+  a setting to turn individual hints off; quick fixes for the rewrites that are truly equivalent (`YEAR(d) = 2024` →
+  a date range), applied one at a time; and, once schema-aware actions can read the database project, the hints that
+  need the schema (implicit conversions, `NOT IN` over a column that can't be NULL).
 - [ ] **`sqlhelper dump`**: print ScriptDom's tree (fragment types and token ranges) for a script, to help when adding
   layout rules. Could share code with the test harness.
 - [ ] **Formatting settings**: add indent string and the other formatting options to the extension's Tools > Options

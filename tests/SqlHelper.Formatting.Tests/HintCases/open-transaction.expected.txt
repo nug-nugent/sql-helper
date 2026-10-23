@@ -1,0 +1,1 @@
+1:1: warning SH607: This transaction is never committed or rolled back in the script, so it holds its locks until the connection closes. End it with COMMIT (and ROLLBACK on error).
