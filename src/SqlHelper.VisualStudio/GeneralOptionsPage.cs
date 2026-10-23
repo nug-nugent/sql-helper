@@ -16,5 +16,10 @@ namespace SqlHelper.VisualStudio
         [DisplayName("Your initials")]
         [Description("Written on the history lines that Add Header adds, e.g. DH. Filled in from your Windows account name the first time, if it can be.")]
         public string Initials { get; set; } = "";
+
+        [Category("Performance hints")]
+        [DisplayName("Flag READ UNCOMMITTED isolation level")]
+        [Description("Whether Show Performance Hints flags SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED, as it does a NOLOCK table hint.")]
+        public bool FlagReadUncommittedIsolation { get; set; }
     }
 }

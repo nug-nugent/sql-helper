@@ -1,0 +1,8 @@
+1:15: warning SH804: VARCHAR with no length here means VARCHAR(1), so longer values are cut short to one character. Give the length.
+2:44: warning SH804: NVARCHAR with no length in a conversion means NVARCHAR(30), so longer values are cut short without an error. Give the length.
+10:2: warning SH801: NOT IN (subquery) returns no rows at all if the subquery returns a NULL, and is often planned less well than NOT EXISTS. Use NOT EXISTS (SELECT 1 FROM ... WHERE ...) instead.
+11:6: warning SH802: A comparison with NULL is never true (= NULL matches nothing, and <> NULL matches nothing either). Use IS NULL or IS NOT NULL.
+12:6: warning SH803: BETWEEN with an end of day written as 23:59:59 misses times later in that last second (and .999 rounds up to the next day for datetime). Use col >= start AND col < the next day instead.
+13:6: warning SH803: An end of day written as 23:59:59 misses times later in that last second (and .999 rounds up to the next day for datetime). Use < the next day instead: col < '20240201'.
+14:21: suggestion SH806: '01/02/2024' means a different date depending on the login's language and DATEFORMAT setting. Write dates as 'yyyymmdd' (or 'yyyy-mm-ddThh:mm:ss' with a time).
+17:1: suggestion SH805: This sets a variable from a query that can return many rows, so it ends up with the value from whichever row comes last. Add a WHERE or TOP (1) ... ORDER BY that picks the row you want.

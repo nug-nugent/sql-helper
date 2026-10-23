@@ -1,0 +1,8 @@
+6:24: warning SH401: NOLOCK reads uncommitted data, and can return rows twice or miss them while pages move. If readers block writers, consider READ COMMITTED SNAPSHOT instead.
+7:18: suggestion SH403: The HASH join hint fixes part of the plan, so it stays the same when the data or indexes change. Make sure it still helps, and say why in a comment. It also fixes the join order.
+7:42: suggestion SH403: INDEX fixes part of the plan, so it stays the same when the data or indexes change. Make sure it still helps, and say why in a comment.
+7:69: suggestion SH403: FORCESEEK fixes part of the plan, so it stays the same when the data or indexes change. Make sure it still helps, and say why in a comment.
+8:9: suggestion SH403: OPTION (MAXDOP) fixes part of the plan, so it stays the same when the data or indexes change. Make sure it still helps, and say why in a comment.
+10:1: warning SH405: SET ROWCOUNT is deprecated for INSERT, UPDATE and DELETE, and the optimiser can't see it when it plans the query. Use TOP (n) on the statement instead.
+15:6: suggestion SH404: WITH RECOMPILE compiles the whole procedure on every call. If only one statement needs a fresh plan, put OPTION (RECOMPILE) on that statement instead.
+18:46: warning SH401: READUNCOMMITTED reads uncommitted data, and can return rows twice or miss them while pages move. If readers block writers, consider READ COMMITTED SNAPSHOT instead.

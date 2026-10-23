@@ -20,6 +20,7 @@ gallery/
 *.trx
 # Snapshot test mismatches; review, then accept or fix
 *.received.sql
+*.received.txt
 
 # VS Code extension
 node_modules/

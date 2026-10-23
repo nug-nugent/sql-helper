@@ -1,0 +1,6 @@
+6:2: warning SH201: A cursor works through rows one at a time, which is usually far slower than one set-based statement. If it has to stay, declare it LOCAL FAST_FORWARD.
+17:2: suggestion SH202: This loop reads or changes tables a row (or a few rows) at a time. One set-based statement over all the rows is usually much faster.
+30:5: suggestion SH203: The scalar function dbo.OrderTotal() runs once per row and stops the query going parallel (unless SQL Server 2019 or later can inline it). An inline table-valued function with CROSS APPLY, or the expression written out, is usually faster.
+31:5: suggestion SH205: A subquery in the select list that refers to the outer query runs once per row unless SQL Server can turn it into a join. A JOIN or OUTER APPLY, with any aggregate grouped once, is usually faster, especially when several subqueries read the same table.
+37:3: suggestion SH203: The scalar function dbo.IsOpen() runs once per row and stops the query going parallel (unless SQL Server 2019 or later can inline it). An inline table-valued function with CROSS APPLY, or the expression written out, is usually faster.
+39:3: warning SH208: ORDER BY NEWID() gives every row a value and sorts the lot to pick a few at random. On a big table, use TABLESAMPLE or pick random keys instead.

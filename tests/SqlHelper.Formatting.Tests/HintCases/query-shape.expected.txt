@@ -1,0 +1,11 @@
+3:8: warning SH306: TOP 100 PERCENT ... ORDER BY in a view, subquery or CTE doesn't order anything: SQL Server ignores the ORDER BY. Order the outer query that reads it.
+4:2: warning SH301: SELECT * in a view, procedure or function reads every column, including ones added later, and can stop an index covering the query. List the columns.
+10:6: suggestion SH302: The CTE Totals is read 2 times, and its query runs each time. If it's expensive, put its rows in a temp table once.
+19:4: suggestion SH303: Counting every row to see whether there are any does more work than needed. Use EXISTS (SELECT 1 FROM ...), which stops at the first row.
+21:1: suggestion SH304: DISTINCT on a query with joins often hides a join that matches more rows than intended, and sorts or hashes every row to remove them. Check the joins; EXISTS may say what's meant.
+27:17: suggestion SH310: A subquery in a join's ON condition can run once per pair of rows. Join to it as a derived table, or move it to the WHERE.
+29:1: suggestion SH305: UNION removes duplicates, but each branch here returns a different constant, so no two rows can be the same. UNION ALL skips the sort or hash that removing them costs.
+33:8: warning SH307: TOP without ORDER BY returns whichever rows SQL Server finds first, which can change from one run to the next. Add an ORDER BY that says which rows you want.
+35:1: warning SH308: FROM a, b with nothing in the WHERE linking every table is a cross join: every row of one with every row of the other. Write the joins out as INNER JOIN ... ON (or CROSS JOIN, if that's really meant).
+40:1: suggestion SH308: Old-style comma joins put the join conditions in the WHERE, where a missing one silently becomes a cross join. Write them as INNER JOIN ... ON.
+52:2: warning SH309: This filters s, the optional side of an outer join, in the WHERE, so rows without a match are thrown away and the outer join acts as an inner join. Move the condition into the join's ON, or make it an INNER JOIN.

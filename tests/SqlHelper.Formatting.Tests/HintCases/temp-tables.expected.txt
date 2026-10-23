@@ -1,0 +1,4 @@
+5:10: suggestion SH501: @Recent is filled from a query and then joined. Before SQL Server 2019 the optimiser assumes a table variable holds one row, which can give a poor join plan for many; a temp table has statistics.
+9:38: suggestion SH504: #Orders is joined 2 times but has no index, so each join reads all of it. If it holds many rows, add a clustered index on the join columns after filling it.
+14:2: suggestion SH503: Creating a temp table after the procedure has started reading or changing data can make it recompile part-way through. Create temp tables together at the start.
+19:3: warning SH502: Creating a temp table inside a loop creates and drops it on every pass. Create it once before the loop and empty it (TRUNCATE TABLE) each time round.

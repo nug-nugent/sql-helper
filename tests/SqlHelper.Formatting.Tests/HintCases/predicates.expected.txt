@@ -1,0 +1,11 @@
+6:6: warning SH109: OR in a join condition usually forces a scan or a nested loop over every row. Split the query into a UNION ALL of one query per alternative, or join twice.
+8:2: warning SH101: YEAR() around a column stops SQL Server seeking an index on it. Compare the bare column instead (for a date part, with a range: col >= '20240101' AND col < '20250101').
+9:6: warning SH102: ISNULL() around a column stops SQL Server seeking an index on it. Write the condition on the bare column, with an OR ... IS NULL if NULLs should match.
+10:6: warning SH103: DATEDIFF() on a column stops SQL Server seeking an index on it. Compare the bare column with a date worked out on the other side, e.g. col >= DATEADD(day, -7, GETDATE()).
+11:6: warning SH104: Arithmetic on a column stops SQL Server seeking an index on it. Move the calculation to the other side, so the column stands alone.
+12:6: warning SH105: Joining columns into a string before comparing stops SQL Server seeking an index on any of them. Compare each column with its own value instead.
+13:23: warning SH106: A LIKE pattern that starts with a wildcard can't seek an index, so every row is read. Anchor the start of the pattern if you can, or use full-text search.
+14:19: warning SH106: A LIKE pattern that starts with a wildcard can't seek an index, so every row is read. Anchor the start of the pattern if you can, or use full-text search.
+15:7: suggestion SH107: An optional-parameter condition gets one plan for every combination of parameters, which is usually a scan. Add OPTION (RECOMPILE) to the statement, or build the SQL with only the conditions that apply.
+16:7: suggestion SH108: OR across different columns usually means one index can't serve the condition, so SQL Server scans. Consider a UNION ALL of one query per column (each able to seek), if this is slow.
+20:6: warning SH101: UPPER() around a column stops SQL Server seeking an index on it. Compare the bare column instead (for a date part, with a range: col >= '20240101' AND col < '20250101').
