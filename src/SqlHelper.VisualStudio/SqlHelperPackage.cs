@@ -13,7 +13,7 @@ namespace SqlHelper.VisualStudio
     /// the first time one of its commands is used.
     /// </summary>
     [PackageRegistration(UseManagedResourcesOnly = true, AllowsBackgroundLoading = true)]
-    [InstalledProductRegistration("SQL Helper", "Formats T-SQL and adds standard comment headers.", BuildVersion.Value)]
+    [InstalledProductRegistration("SQL Helper", "Formats and cleans up T-SQL, adds comment headers and semicolons, and converts to and from dynamic SQL.", BuildVersion.Value)]
     [ProvideMenuResource("Menus.ctmenu", 1)]
     // The classic options page, for Visual Studio 2022 and classic-mode Options. Where Unified Settings is on
     // (VS 2026, SSMS 22) it is hidden and registration.json's settings are shown instead.
