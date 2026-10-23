@@ -3,7 +3,7 @@
   <Metadata>
     <Identity Id="SqlHelper.da9f88e3-2c31-4753-a253-5f0959d25293" Version="|%CurrentProject%;GetVsixVersion|" Language="en-US" Publisher="David Huggett" />
     <DisplayName>SQL Helper</DisplayName>
-    <Description xml:space="preserve">Formats T-SQL and adds standard comment headers, for SSMS and Visual Studio.</Description>
+    <Description xml:space="preserve">Formats T-SQL in a consistent house style, and cleans up joins, keywords, aliases and brackets, adds standard comment headers and semicolons, and converts statements to and from dynamic SQL. For SSMS 22 and Visual Studio 2026.</Description>
     <MoreInfo>https://github.com/nug-nugent/sql-helper</MoreInfo>
     <License>LICENSE.txt</License>
     <Tags>SQL, T-SQL, formatter, SSMS</Tags>
